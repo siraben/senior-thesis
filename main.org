@@ -1,0 +1,408 @@
+#+TITLE: Notions of graph theory in type theory
+#+SUBTITLE: A case study on definitional differences between type-theoretic constructions of graphs.
+#+AUTHOR: Siraphob (Ben) Phipathananunth
+#+LATEX_CLASS: scrartcl
+#+LATEX_HEADER: \usepackage[margin=1in]{geometry}
+#+LATEX_HEADER: \usepackage{bussproofs}
+\newcommand{\typ}{\,:\,}
+\newcommand{\lam}[2]{\lambda #1.\,#2}
+\newcommand{\app}[2]{#1\,#2}
+
+
+#+BEGIN_comment
+• Introduction
+  • Historical context for logics, formalization of mathematics
+• Overview of dependent type theory
+  • Comparisons with set theory and first-order theories
+  • Curry-Howard correspondence
+  • Constructivism and axioms
+  • Representation of mathematical objects in type theory
+• Overview of graph theory formalizations in Coq
+  • math-comp (2008), formalization of four-color theorem
+  • CertiGraph (2019), verification of graph-manipulating programs
+  • Doczkal and Pous (2019), formalization of Menger’s theorem and treewidths
+  • my formalization, verification of graph coloring
+• Conclusion
+  • Relation to developments in other proof assistants (Lean, Isabelle/HOL)
+• Future work
+
+#+END_comment
+
+* Introduction
+Despite the rich theory and extensive applications of graph theory in
+computer science and mathematics, formal developments of graph theory
+have mostly been restricted to specific applications or definitions of
+graphs. In this work we seek to catalog various approaches to
+formalization of graph theory that have been taken in the literature,
+in particular, the motivations underlying the formalization, the
+theoretical design choices taken and the strength of the conclusions.
+
+** Notational conventions
+To maintain consistent notation throughout the paper, we will use
+/italics/ when referencing mathematical objects such as sets and types.
+We will use ~monospace~ when referencing definitions in the Coq proof
+assistant. This is so we can remain unambiguous when we refer to a
+graph /G/, its degree $|G|$ and a Coq statement ~max_degree G > 0~. that
+its degree is non-zero.
+
+* Mechanization of mathematics and computer science
+# cite resources in CertiGraph thesis
+The formalist approach to mathematics has had a long history dating
+back to Euclid's /Elements/. In such developments, it is desirable to
+capture arguments and conclusions drawn from a finite set of axioms
+and rules of inference. Proof checking would then be a process that a
+mathematician could follow by hand. If the axioms and inferences were
+applied correctly, then that is all that is needed to establish the
+validity of a result.
+
+# https://en.wikipedia.org/wiki/Non-surveyable_proof
+# cite Gonthier 2005
+However, in recent years, there have been cases where some
+mathematical proofs were considered infeasible for a human to verify,
+thus bringing into question the validity of the result. For instance,
+in 1976, Appel and Haken announced a positive proof of the four-color
+problem which was assisted in part by a computer program to perform
+the extensive case analysis for the reducible configurations. However,
+in the years that followed, several errors were uncovered which were
+subsequently fixed. Eventually, in 2005, Gonthier et al. formalized
+the result in the Coq proof assistant, eliminating the need for
+trusting a program to check the cases.
+
+# cite Hales 1998
+A similar series of events played out for the proof of the Kepler
+Conjecture, which concerns the optimal packing density for spheres in
+three dimensions. Hales (1998) announced a proof of the Kepler
+conjecture involving lengthy case analysis with computer
+assistance. Subsequently, with Hales leading the Flyspeck project, a
+formal proof of the Kepler conjecture was announced in 2017, using the
+Isabelle and HOL Light proof assistants.
+
+# https://drops.dagstuhl.de/opus/volltexte/2021/13914/pdf/LIPIcs-ITP-2021-19.pdf
+Mechanization can also provide much-needed rigor to areas that contain
+many folklore results. In 2021, Forster et al. presented a mechanized
+proof of the time invariance thesis for the weak call-by-value
+\lambda-calculus, which states that the weak call-by-value
+\lambda-calculus and Turing machines can simulate each other with a
+polynomial overhead in time. Forseter et al. 2021 provide an account
+of prior work on the result and the varying levels of formality in
+them. The work has been contributed to the Coq Library of
+Undecidability Proofs.
+
+Inspired by these lines of work, we seek to understand, document and
+develop mechanized theories of graph theory in Coq. Graph theory is a
+particularly suitable area for mechanization due to its wide
+applicability across various fields, its simple underlying structure,
+and its computability. Graphs are fundamental objects in mathematics
+and computer science, with numerous applications in physics, biology,
+social sciences, and engineering. They are used to model complex
+systems, such as networks of social interactions, transportation
+systems, communication networks, and more.
+
+The simplicity of graphs' underlying structure makes them a natural
+fit for mechanization. Graphs consist of vertices and edges, which can
+be represented as sets or functions, respectively. This simplicity
+allows for a clear formalization of the concepts and definitions of
+graph theory, and facilitates the automation of reasoning tasks.
+
+Furthermore, graph algorithms are inherently computable, making them
+amenable to computer-assisted proofs. The algorithms for problems such
+as finding the shortest path between two vertices, testing for the
+existence of a cycle, or determining the chromatic number of a graph,
+can be implemented in a computer program and executed to obtain a
+solution. This computability enables the use of proof assistants,
+which can help verify the correctness of the algorithms and proofs.
+
+** Formal proof of the Four-Color Theorem
+# cite 4color theorem
+The arguably most well-known formalization of graph theory in a proof
+assistant can be seen in Gonthier's formal proof of the Four-Color
+Theorem.
+
+
+# expand
+In the literature, graph theory has been successfully implemented in
+Coq and has lead to formalizations of major theorems such as the four
+color theorem. Other results include formalization of Ramsey
+theorems, max-flow min-cut for countable graphs.
+
+# cite Graph Theory in Coq: Minors, Treewidth and Isomorphisms
+Doczkal and Pous state that ...
+
+However, many assumptions underlie the graph structure used in formal
+developments. For instance, it is often assumed that the vertex type
+is finite and the edge relation is decidable.
+
+These are reasonable assumptions.
+
+The assumptions that underlie such formal developments
+
+** CertiGraph
+# Certifying graph-manipulating C programs via localizations within
+# data structures
+Wang et al. develops mechanized graph theory as a necessary component
+of being able to reason about graph-manipulating programs written in
+CompCert C, a dialect of the C programming language that has a
+verified compiler (i.e. the preservation of the semantics of the
+source and compiled programs is formally stated and proved). To the
+author's knowledge, this is one of the most comprehensive general
+development of graph theory in Coq to date.
+
+# cite Wang thesis: Mechanized Verification of Graph-Manipulating
+# Programs
+In Wang 2019, particular attention was paid to the definition of
+graphs in order to retain as much generality as possible. The base
+construction of the graph is as follows:
+
+#+begin_src coq
+Definition Ensemble (U : Type) := U -> Prop.
+Record PreGraph (Vertex Edge : Type)
+                {EV: EqDec Vertex eq} {EE: EqDec Edge eq} := {
+  vvalid : Ensemble Vertex;
+  evalid : Ensemble Edge;
+  src : Edge -> Vertex;
+  dst : Edge -> Vertex
+}.
+#+end_src
+
+That is, we start with a notion of a ~PreGraph~, which is a record
+parameterized over types ~Vertex~ and ~Edge~ (corresponding to the types
+for vertices and edges respectively), along with proofs of decidable
+equality over those types.  As we have seen in a previous section,
+decidable equality for types is not guaranteed in the same way it is
+for set theory.  In the context of graph-manipulating programs, Wang
+states that decidable equality ``is such a fundamental property that
+almost all sensible graph-manipulating algorithms employ it whether or
+not they realize it''.
+
+# continue talking about Wang's construction of graphs in type theory
+
+
+
+* Overview of dependent type theory
+# https://homepages.inf.ed.ac.uk/wadler/papers/propositions-as-types/propositions-as-types.pdf
+
+
+Dependent type theory was initially proposed by Per Martin-Löf in the
+early 1970s.
+
+# cite 
+A /type theory/ is a logical system consisting of rules of inference
+that declare how one may produce valid derivations. The objects of
+interest in the type theory are /terms/ and /types/ over those terms. When
+a term $x$ has the type $\tau$, the notational convention is $x:\tau$,
+which is analogous to set membership.
+
+# cite something
+In type theory, analogously to sequent calculus, one may check
+mechanically check the validity of derivations according to the
+provided inference rules. One key difference between type systems and
+sequent calculi is that type systems allow for /evaluation/ or
+/computation/ of terms. We elide the metatheoretic details that
+constrain how exactly evaluation in the presence of typing judgments
+should be designed, but it suffices to say that property that is most
+desirable of a type system used for formalizing mathematics is
+/consistency/. If a system is /inconsistent/, all types become
+inhabited. Under the Curry-Howard correspondence (detailed in the next
+section), this corresponds to all statements being true, making the
+theory useless for formalization.
+
+To define a type theory, one defines the set of types. For instance,
+the in Simply Typed Lambda Calculus, we fix a set of base types $B$
+along with an inductive rule that if $\sigma$ and $\tau$ are types,
+then $\sigma\to\tau$ is a type. By convention, $\to$ associates to the
+right, thus $\alpha\to\beta\to\gamma$ is the same as
+$\alpha\to(\beta\to\gamma)$.
+
+In addition to base types, one may also assign a set of /term constants/
+that inhabit the b
+
+
+** Curry-Howard correspondence
+In propositional logic, a formula consists of either a /propositional
+variable/ $X_n$ or a compound formula $A \land B$, $A \lor B$, $A \implies
+B$, $\lnot A$, where $A$ and $B$ are formulas. *continue expanding*
+
+The Curry-Howard correspondence provides a correspondence between
+proof calculi and computational type systems.
+
+| *Logic*                | *Types*              | *Sets*                          |
+|----------------------+--------------------+-------------------------------|
+| proposition          | $A$                | set                           |
+| proof                | $a : A$            | element                       |
+| predicate            | $B(x)$             | family of sets                |
+| conditional proof    | $b(x): B(x)$       | family of elements            |
+| $\bot,\top$          | 0,1                | $\emptyset,\{\emptyset\}$     |
+| $A\lor B$            | $A + B$            | disjoint union                |
+| $A\land B$           | $A \times B$       | cartesian product             |
+| $A\implies B$        | $A \to B$          | set of functions              |
+| $\exists_{x:A} B(x)$ | $\sum_{x:A} B(x)$  | disjoint union of families    |
+| $\forall_{x:A} B(x)$ | $\prod_{x:A} B(x)$ | cartesian product of families |
+
+For the simply-typed lambda calculus, the Curry-Howard correspondence
+can be viewed as a theorem that relates the derivation of any
+judgement $x_1:A_1,\ldots,x_n:A_n\vdash B$ with a lambda term $M$ such
+that $x_1:A_1,\ldots,x_n:A_n\vdash M : B$ is a valid typing
+judgement.  The reader can consult a proof in *cite lecture notes on
+lambda calculus*.
+
+
+
+** Constructing new types in type theory
+# cite HoTT book
+We summarize an outline of how new types can be introduced into a type
+theory. For simplicity we will elide references to universes,
+convertability and other metatheoretic details, which the reader can
+read more in XXXX.
+
+
+In the same way that in logic, when we define a connective for
+
+** Comparisons with Set Theory and First-order Theories
+Since the early 20th century, set theory and first-order theories have
+been used as foundations for mathematics. However, dependent type
+theory provides several advantages over these classical
+systems. Unlike in set theory, which is primarily based on the notion
+of collections of elements, dependent type theory revolves around the
+concept of types and their inhabitants.
+
+In first-order theories, quantifiers range over elements of a single
+sort, whereas in dependent type theory, it is possible for different
+quantifiers in the same formula to refer to elements of different
+types.
+
+
+# introduction to dep TT, history, etc.
+** Interactions between axioms in dependent type theory
+In particular, we must take care when adding extra assumptions in type
+theory, since they may interact in subtle ways that allow for LEM to
+be proven. For instance, assuming propositional extensionality and
+decidable equality implies LEM:
+
+*Lemma.* /Propositional extensionality (PropExt) and decidable equality
+(DecEq) together imply LEM./
+
+# use proof environment
+*Proof.* Assume /PropExt/, that is, for all propositions $P$, $Q$,
+$P\leftrightarrow Q$ implies $P=Q$. Assume /DecEq/, that is, for all
+types $X$ and members $a$, $b$ of type $X$, either $a=b$ or $a\neq b$.
+
+First we prove a small lemma that for all propositions $P$,
+$P=(P=\top)$. That is, a proposition $P$ is equal to a proof of
+equality between $P$ and $\top$, which has a single trivial
+inhabitant. By /PropExt/, it suffices to prove
+$P\leftrightarrow (P=\top)$.
+
+$(\rightarrow)$ Assume $P$. We want to show $P=\top$. By /PropExt/,
+it suffices to show $P\leftrightarrow\top$, which is trivial because
+we have a proof of $P$ and the trivial proof for $\top$.
+
+$(\leftarrow)$ Assume $P=\top$. We want to show $P$. This is trivial
+since using the assumption we have to prove $\top$.
+
+#+CAPTION: Formal Coq proof of Lemma 1.
+#+BEGIN_src coq
+Require Import Coq.Logic.PropExtensionality.
+Definition deceq := forall (X : Type) (a b : X), a = b \/ a <> b.
+Definition lem := forall (P : Prop), P \/ ~ P.
+
+(* credit: Andrej Bauer *)
+Lemma small_lemma : forall (P : Prop), P = (P = True).
+Proof.
+  intros P.
+  apply propositional_extensionality.
+  split; intros.
+  - apply propositional_extensionality; firstorder.
+  - rewrite H; firstorder.
+Qed.
+
+Lemma deceq_lem : deceq -> lem.
+Proof.
+  unfold deceq, lem.
+  intros deceq P.
+  rewrite (small_lemma P).
+  apply deceq.
+Qed.
+#+END_src
+
+** Overview of Coq
+Our work takes place in a logical framework of constructive type
+theory, such as that of Coq. We have the hierarchy of \textit{type
+universes} and a universe of \textit{propositions}, called
+\texttt{Prop}, written as $\mathbb{P}$. At the type level, we have the
+unit type $\boldsymbol{1}$, the empty type $\boldsymbol 0$, function
+types $A\to B$, products $A\times B$, sums $A+B$, dependent products
+$\forall (x : X), F(x)$ and dependent sums $\exists (x : X),
+F(x)$. Note that function application associates to the left in Coq
+and every function takes one argument, so we can write $f\,a\,b$
+instead of $(f(a))(b)$. For propositions, these are written as they
+are in logic, $(\top,\bot,\to ,\wedge,\vee,\forall,\exists)$. For
+brevity we will not go into details about the Coq type system here,
+which is well-covered in literature.
+
+An important point to make is that Coq's logic is
+\textit{constructive}. In particular we do not assume excluded middle
+(LEM), which is the statement $\forall (p : \mathbb{P}), p \vee \neg
+p$. This is obvious in classical mathematics but since we are working
+in type theory, disjunctions have to be computable (that is, we can
+always find out in finite time if the disjunction is the left or the
+right element. In general this does not hold in Coq (because $p$ could
+be undecidable), but fortunately for us everything is pretty much
+decidable (comparing integers, checking if a key is in a map or set,
+etc.).
+
+Coq consists of two languages, \textit{Gallina} and
+\textit{Ltac}. Gallina is the specification language of Coq and can be
+thought of as the expressions in Coq. Gallina is purely functional and
+has support for dependent types and dependent pattern
+matching. \textit{Ltac} is the tactic language of Coq and is what is
+used to carry out formal proofs. An introduction can be found in
+\cite{tactic} and \cite{hurry}. It suffices to say that, from a
+usability standpoint, \textit{Ltac} commands operate on the current
+\textit{proof state}, which is the context consisting of hypothesis
+and a goal. The commands may introduce new hypotheses, clear existing
+ones, allow application of one hypothesis to another, discriminate a
+value in context, and so on.
+
+*** Definitions in Coq
+
+#+begin_src coq
+Inductive nat : Set :=
+  O : nat
+| S : nat -> nat.
+#+end_src
+
+* Building graph theory in Coq
+When building any mathematical theory, one must start with the
+definition of the objects of that theory.
+
+- graph theory is usually built on top of set theory
+- but we're in type theory
+- example of decidable equality
+
+** Example lemma: maximum degree and subgraphs
+To illustrate the level of detail that is required in a formal proof
+and to motivate introspection into implicit assumptions about graphs,
+we will deconstruct a lemma about how maximum degrees interact with
+the subgraph relation.
+
+*Lemma.* Let ~G'~ be a subgraph of ~G~. Then ~max_deg G' <= max_deg G~.
+
+*Proof.* When ~max_deg G'~ is zero, this is immediate. Otherwise, there is
+some vertex ~k~ of non-zero maximum degree in ~G'~. Since ~G'~ is a subgraph
+of ~G~, this vertex ~k~ is also in ~G~. Since ~G'~ is a subgraph of ~G~, the
+pointwise vertex sets of ~G'~ are subsets of the corresponding vertex
+set in ~G~. In particular, ~G'[k]~ is a subset of ~G[k]~. Let ~t~ be the
+vertex of (non-zero) maximum degree in ~G~. Since ~t~ is a vertex of
+maximum degree, the size of ~G[t]~ bounds the size of all other vertex
+sets, in particular ~G[k]~. Thus, ~max_deg G' = G'[k] <= G[k] <= G[t] =
+max_deg G~, as desired.
+
+* References
+# turn into bibtex
+
+
+- Graph Theory in Coq: Minors, Treewidth, and Isomorphisms
+ https://hal.science/hal-02127698/document
+- Five stages of accepting constructive mathematics https://www.ams.org/journals/bull/2017-54-03/S0273-0979-2016-01556-4/S0273-0979-2016-01556-4.pdf
+- https://www.comp.nus.edu.sg/~hobor/Teaching/SW-PhD.pdf
+# @article{hales_adams_bauer_dang_harrison_hoang_kaliszyk_magron_mclaughlin_nguyen_et al._2017, title={A FORMAL PROOF OF THE KEPLER CONJECTURE}, volume={5}, DOI={10.1017/fmp.2017.1}, journal={Forum of Mathematics, Pi}, publisher={Cambridge University Press}, author={HALES, THOMAS and ADAMS, MARK and BAUER, GERTRUD and DANG, TAT DAT and HARRISON, JOHN and HOANG, LE TRUONG and KALISZYK, CEZARY and MAGRON, VICTOR and MCLAUGHLIN, SEAN and NGUYEN, TAT THANG and et al.}, year={2017}, pages={e2}}
