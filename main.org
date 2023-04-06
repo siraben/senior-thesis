@@ -100,9 +100,11 @@ systems, communication networks, and more.
 
 The simplicity of graphs' underlying structure makes them a natural
 fit for mechanization. Graphs consist of vertices and edges, which can
-be represented as sets or functions, respectively. This simplicity
-allows for a clear formalization of the concepts and definitions of
-graph theory, and facilitates the automation of reasoning tasks.
+be represented as sets, functions or relations (as we shall see,
+representation can bring have subtle metatheoretic implications). This
+simplicity allows for a clear formalization of the concepts and
+definitions of graph theory, and facilitates the automation of
+reasoning tasks.
 
 Furthermore, graph algorithms are inherently computable, making them
 amenable to computer-assisted proofs. The algorithms for problems such
@@ -179,51 +181,117 @@ not they realize it''.
 
 
 * Overview of dependent type theory
-# https://homepages.inf.ed.ac.uk/wadler/papers/propositions-as-types/propositions-as-types.pdf
+Type theory has a rich history, dating back to the work of Bertrand
+Russell and Alfred North Whitehead's Principia Mathematica in the
+early 20th century. The aim of type theory is to provide a foundation
+for mathematics that avoids the paradoxes arising from naive set
+theory. In type theory, the objects of interest are not sets, but
+rather types and terms over those types.
 
-
-Dependent type theory was initially proposed by Per Martin-Löf in the
-early 1970s.
-
-# cite 
-A /type theory/ is a logical system consisting of rules of inference
+Simply Typed Lambda Calculus (STLC) is a type theory that was
+introduced by Church in the 1940s. It consists of rules of inference
 that declare how one may produce valid derivations. The objects of
-interest in the type theory are /terms/ and /types/ over those terms. When
-a term $x$ has the type $\tau$, the notational convention is $x:\tau$,
-which is analogous to set membership.
+interest in STLC are terms and types over those terms. When a term $x$
+has the type $\tau$, the notational convention is $x:\tau$, which is
+analogous to set membership.
 
-# cite something
-In type theory, analogously to sequent calculus, one may check
-mechanically check the validity of derivations according to the
-provided inference rules. One key difference between type systems and
-sequent calculi is that type systems allow for /evaluation/ or
-/computation/ of terms. We elide the metatheoretic details that
-constrain how exactly evaluation in the presence of typing judgments
-should be designed, but it suffices to say that property that is most
-desirable of a type system used for formalizing mathematics is
-/consistency/. If a system is /inconsistent/, all types become
-inhabited. Under the Curry-Howard correspondence (detailed in the next
-section), this corresponds to all statements being true, making the
-theory useless for formalization.
+Proof rules are a useful tool in STLC to establish the validity of
+type derivations. Here are the inference rules for the three rules in
+STLC, along with their names:
 
-To define a type theory, one defines the set of types. For instance,
-the in Simply Typed Lambda Calculus, we fix a set of base types $B$
-along with an inductive rule that if $\sigma$ and $\tau$ are types,
-then $\sigma\to\tau$ is a type. By convention, $\to$ associates to the
-right, thus $\alpha\to\beta\to\gamma$ is the same as
-$\alpha\to(\beta\to\gamma)$.
+\begin{prooftree}
+\AxiomC{}
+\RightLabel{(Var)}
+\UnaryInfC{$\Gamma,x:\tau \vdash x:\tau$}
+\end{prooftree}
 
-In addition to base types, one may also assign a set of /term constants/
-that inhabit the b
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash e_1 : \sigma \to \tau$}
+\AxiomC{$\Gamma \vdash e_2 : \sigma$}
+\RightLabel{(App)}
+\BinaryInfC{$\Gamma \vdash e_1\,e_2 : \tau$}
+\end{prooftree}
 
+\begin{prooftree}
+\AxiomC{$\Gamma,x:\sigma \vdash e : \tau$}
+\RightLabel{(Abs)}
+\UnaryInfC{$\Gamma \vdash (\lambda x.e) : \sigma \to \tau$}
+\end{prooftree}
+
+The first inference rule is for the variable rule, which states that
+if $x$ has type $\tau$ in the context $\Gamma$, then $x$ has type
+$\tau$. The second inference rule is for the application rule, which
+states that if $e_1$ has type $\sigma \to \tau$ and $e_2$ has type
+$\sigma$ in the context $\Gamma$, then $e_1\ e_2$ has type $\tau$. By
+convention, application is left-associative and parentheses may be
+omitted. The third inference rule is for the lambda abstraction rule,
+which states that if $e$ has type $\tau$ in the context $\Gamma$
+extended with a variable $x$ of type $\sigma$, then $\lambda x.e$ has
+type $\sigma \to \tau$.
+
+Polymorphic lambda calculus extends STLC by introducing type-level
+quantifiers, allowing functions to be defined over types. One example
+of polymorphic lambda calculus is System F, which adds the ability to
+define functions over types, creating a type hierarchy. The
+quantifiers in System F are type-level, allowing for more expressive
+type signatures. Here is an example of an inference rule for the type
+abstraction rule in System F:
+
+\begin{prooftree}
+\AxiomC{$\Gamma, \alpha \vdash e:\tau$}
+\RightLabel{(TAbs)}
+\UnaryInfC{$\Gamma \vdash \Lambda \alpha.e:\forall \alpha.\tau$}
+\end{prooftree}
+
+This inference rule shows that if expression $e$ has type $\tau$ in
+the context $\Gamma$ extended with a type variable $\alpha$, then the
+type abstraction $\Lambda \alpha.e$ has the polymorphic type $\forall
+\alpha.\tau$.
+
+Dependent type theory extends System F by allowing types to depend on
+terms, enabling more expressivity. The Calculus of Constructions is an
+example of dependent type theory that adds the ability to define
+functions over types, creating a type hierarchy. The Calculus of
+Inductive Constructions extends the Calculus of Constructions with
+inductive types, allowing for formalization of mathematical structures
+such as natural numbers, lists, and trees.
+
+In the Calculus of Constructions, a key feature is the use of
+universes, which are a hierarchy of types that can contain other
+types. A universe is a type that can serve as the type of other types,
+and universes can contain each other in a hierarchy. For example, the
+universe of small types might be contained within a larger universe of
+larger types.
+
+Universes are necessary in the Calculus of Constructions because they
+allow us to avoid paradoxes that arise when types are allowed to
+contain themselves. By separating types into a hierarchy of universes,
+we can ensure that any given type is contained in a universe that is
+larger than itself, preventing paradoxes such as Russell's paradox.
+
+Here is an example of a proof rule for the dependent product formation
+rule in the Calculus of Constructions:
+
+\begin{prooftree}
+\AxiomC{$\Gamma \vdash A \typ U_i$}
+\AxiomC{$\Gamma, x:A \vdash B \typ U_j$}
+\RightLabel{(Prod)}
+\BinaryInfC{$\Gamma \vdash (\Pi x:A.B) \typ U_{\max(i,j)}$}
+\end{prooftree}
+
+This inference rule shows that if $A$ has type $U_i$ and $B$ has type
+$U_j$ in the context $\Gamma$ extended with variable $x$ of type $A$,
+then the dependent product $\Pi x:A.B$ has type $U_{\max(i,j)}$.
+
+Dependent type theory provides a foundation for modern proof
+assistants such as Coq and Lean, which use the Calculus of Inductive
+Constructions as their underlying logic. These proof assistants are
+used to formalize mathematics, verify software, and prove the
+correctness of algorithms.
 
 ** Curry-Howard correspondence
-In propositional logic, a formula consists of either a /propositional
-variable/ $X_n$ or a compound formula $A \land B$, $A \lor B$, $A \implies
-B$, $\lnot A$, where $A$ and $B$ are formulas. *continue expanding*
 
-The Curry-Howard correspondence provides a correspondence between
-proof calculi and computational type systems.
+The Curry-Howard correspondence provides a correspondence between proof calculi and computational type systems. In propositional logic, a formula consists of either a propositional variable $X_n$ or a compound formula $A \land B$, $A \lor B$, $A \implies B$, $\lnot A$, where $A$ and $B$ are formulas. The Curry-Howard correspondence provides a way to map these logical formulas to types and lambda terms in a computational type system. The table below summarizes the correspondence between logic, types, and sets.
 
 | *Logic*                | *Types*              | *Sets*                          |
 |----------------------+--------------------+-------------------------------|
@@ -231,31 +299,144 @@ proof calculi and computational type systems.
 | proof                | $a : A$            | element                       |
 | predicate            | $B(x)$             | family of sets                |
 | conditional proof    | $b(x): B(x)$       | family of elements            |
-| $\bot,\top$          | 0,1                | $\emptyset,\{\emptyset\}$     |
+| $\bot,\top$          | 0,1                | $\emptyset,{\emptyset}$       |
 | $A\lor B$            | $A + B$            | disjoint union                |
 | $A\land B$           | $A \times B$       | cartesian product             |
 | $A\implies B$        | $A \to B$          | set of functions              |
 | $\exists_{x:A} B(x)$ | $\sum_{x:A} B(x)$  | disjoint union of families    |
 | $\forall_{x:A} B(x)$ | $\prod_{x:A} B(x)$ | cartesian product of families |
 
-For the simply-typed lambda calculus, the Curry-Howard correspondence
-can be viewed as a theorem that relates the derivation of any
-judgement $x_1:A_1,\ldots,x_n:A_n\vdash B$ with a lambda term $M$ such
-that $x_1:A_1,\ldots,x_n:A_n\vdash M : B$ is a valid typing
-judgement.  The reader can consult a proof in *cite lecture notes on
-lambda calculus*.
-
-
+For the simply-typed lambda calculus, the Curry-Howard correspondence can be viewed as a theorem that relates the derivation of any judgement $x_1:A_1,\ldots,x_n:A_n\vdash B$ with a lambda term $M$ such that $x_1:A_1,\ldots,x_n:A_n\vdash M : B$ is a valid typing judgement. In other words, each valid proof in propositional logic corresponds to a valid lambda term in the simply-typed lambda calculus, and vice versa.
 
 ** Constructing new types in type theory
-# cite HoTT book
-We summarize an outline of how new types can be introduced into a type
-theory. For simplicity we will elide references to universes,
-convertability and other metatheoretic details, which the reader can
-read more in XXXX.
 
+In type theory, it is possible to introduce new types by either
+defining them as inductive types or by defining them as dependent
+types. The ability to construct new types is a fundamental aspect of
+type theory that enables the encoding of complex mathematical
+structures.
 
-In the same way that in logic, when we define a connective for
+In the Simply-Typed Lambda Calculus (STLC), only base types and
+function types can be defined. Base types are fixed by the language,
+while function types are constructed using the arrow operator
+$\to$. For example, the type of a function that takes an integer as
+input and returns a boolean as output can be written as $int \to
+bool$.
+
+In System F, polymorphic types can be defined using universal
+quantification. For example, the identity function can be defined with
+type $\forall \alpha. \alpha \to \alpha$, where $\alpha$ is a type
+variable ranging over all possible types. This type captures the
+essence of the identity function, which takes any input of any type
+and returns the same value.
+
+In the Calculus of Constructions, new types can be defined using
+dependent products, dependent sums, and inductive types. A dependent
+product is a type of the form $\prod_{x:A} B(x)$, where $A$ is a type
+and $B : A \to \mathbb{U}$ is a type that depends on $x$. This type
+can be interpreted as the type of functions that take an input of type
+$A$ and return an output of type $B(x)$ for some $x$. For example, the
+dependent product $\prod_{n:\mathbb{N}}\mathbb{R}^n$ represents the
+type of functions that take an input $n$ representing the dimension of
+a vector and return an output of type $\mathbb{R}^n$ representing a
+vector in \(n\)-dimensional space. Note that if $B : A \to \mathbb{U}$
+is a constant function, the dependent product $\prod_{x:A} B(x)$ is
+the same as the function type $A \to B$.
+
+A dependent sum is a type of the form $\sum_{x:A} B(x)$, where $A$ is
+a type and $B(x)$ is a type that depends on $x$. This type can be
+interpreted as the type of pairs $(a,b)$ where $a$ is an element of
+type $A$ and $b$ is an element of type $B(a)$. For example, the
+dependent sum $\sum_{n:\mathbb{N}}\mathbb{R}^n$ represents the type of
+pairs $(n,v)$ where $n$ is a natural number representing the dimension
+of a vector and $v$ is an element of type $\mathbb{R}^n$ representing
+a vector in \(n\)-dimensional space.
+
+Inductive types allow for the construction of new types using
+constructors that create new elements of the type. For example, the
+natural numbers can be defined as an inductive type with constructors
+$0$ and $succ(n)$, where $n$ is a natural number. The type of natural
+numbers can be written as $Nat$, and elements of this type can be
+constructed using the constructors $0$ and $succ(n)$.
+
+** Inductive Types in the Calculus of Constructions
+Inductive types are a powerful feature in the Calculus of
+Constructions, enabling the definition of complex mathematical
+structures such as natural numbers, lists, and trees. In Coq, one of
+the most popular proof assistants based on the Calculus of
+Constructions, inductive types are defined using the Inductive keyword
+followed by the name of the type and its constructors.
+
+For example, the natural numbers can be defined in Coq as follows:
+
+#+BEGIN_SRC coq
+Inductive nat : Type :=
+| O : nat
+| S : nat -> nat.
+#+END_SRC
+
+This definition introduces a new type nat with two constructors O and
+S, representing zero and successor, respectively. The constructor S
+takes an argument of type nat and returns a new nat representing its
+successor.
+
+Lists can also be defined as an inductive type in Coq, with two
+constructors ~nil~ and ~cons~ representing the empty list and the cons
+operation, respectively:
+
+#+BEGIN_SRC coq
+Inductive list (A : Type) : Type :=
+| nil : list A
+| cons : A -> list A -> list A.
+#+END_SRC
+
+This definition introduces a new type list A parameterized over a type
+A, with two constructors nil and cons. The constructor cons takes an
+element of type A and a list of type list A, and returns a new list
+with the element added to the front.
+
+Here is an example of a Coq function that computes the length of a list:
+
+#+BEGIN_SRC coq
+Fixpoint length {A : Type} (l : list A) : nat :=
+match l with
+| nil => O
+| cons _ xs => S (length xs)
+end.
+#+END_SRC
+
+This function uses pattern matching to match on the two constructors
+nil and cons, and recursively computes the length of the rest of the
+list using the length function.
+
+In the Calculus of Constructions, inductive types are defined using a
+similar syntax, with constructors specified using the \(C : T\)
+notation where \(C\) is the constructor name and \(T\) is the type of
+the constructor.
+
+Here is the definition of the natural numbers as an inductive type in
+the Calculus of Constructions:
+
+*Formation Rule for* $\mathbb{N}$
+
+\begin{prooftree}
+\AxiomC{}
+\UnaryInfC{$\vdash \mathbb{N} : \mathbb{U}$}
+\end{prooftree}
+
+*Introduction Rules for* $\mathbb{N}$
+\begin{prooftree}
+\AxiomC{}
+\UnaryInfC{$\vdash 0 : \mathbb{N}$}
+\end{prooftree}
+
+\begin{prooftree}
+\AxiomC{$\vdash n : \mathbb{N}$}
+\UnaryInfC{$\vdash \texttt{succ}\,n : \mathbb{N}$}
+\end{prooftree}
+
+This definition introduces a new inductive type nat with two
+constructors 0 and /succ/, and is a type that belongs to the universe.
 
 ** Comparisons with Set Theory and First-order Theories
 Since the early 20th century, set theory and first-order theories have
@@ -263,13 +444,21 @@ been used as foundations for mathematics. However, dependent type
 theory provides several advantages over these classical
 systems. Unlike in set theory, which is primarily based on the notion
 of collections of elements, dependent type theory revolves around the
-concept of types and their inhabitants.
+concept of types and their inhabitants. This allows for a more natural
+way of reasoning about mathematical objects and their properties.
 
 In first-order theories, quantifiers range over elements of a single
 sort, whereas in dependent type theory, it is possible for different
 quantifiers in the same formula to refer to elements of different
-types.
+types. This allows for a more flexible and expressive way of
+expressing mathematical concepts and reasoning about them.
 
+In summary, dependent type theory provides a powerful foundation for
+mathematics and computer science, enabling precise and expressive
+reasoning about mathematical objects and their properties. It is a
+foundation for modern proof assistants such as Coq, Lean, and Agda,
+which are used to formalize mathematics, verify software, and prove
+the correctness of algorithms.
 
 # introduction to dep TT, history, etc.
 ** Interactions between axioms in dependent type theory
