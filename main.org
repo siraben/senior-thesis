@@ -9,7 +9,7 @@
 #+LATEX_HEADER: \usepackage{algpseudocode,algorithm,algorithmicx}
 #+LATEX_HEADER: \newtheorem*{thm*}{Theorem}
 #+LATEX_HEADER: \newtheorem{thm}{Theorem}
-#+LATEX_HEADER: \newtheorem{lem}[thm]{Lemma}
+#+LATEX_HEADER: \newtheorem*{lem}{Lemma}
 #+LATEX_HEADER: \usepackage[backend=biber]{biblatex}
 #+LATEX_HEADER: \addbibresource{citations.bib}
 
@@ -66,18 +66,6 @@ Writing notes:
 \tableofcontents
 \newpage
 * Introduction
-We present an overview on developments of graph theory in type
-theory.
-
-** Notational conventions
-To maintain consistent notation throughout the paper, we will use
-/italics/ when referencing mathematical objects such as sets and types.
-We will use ~monospace~ when referencing definitions in the Coq proof
-assistant. This is so we can remain unambiguous when we refer to a
-graph /G/, its degree $|G|$ and a Coq statement ~max_degree G > 0~. that
-its degree is non-zero.
-
-* Mechanization of mathematics and computer science
 The formalist approach to mathematics has had a long history dating
 back to Euclid's /Elements/. In such developments, it is desirable to
 capture arguments and conclusions drawn from a finite set of axioms
@@ -89,10 +77,10 @@ validity of a result.
 However, in recent years, there have been cases where some
 mathematical proofs were considered infeasible for a human to verify,
 thus bringing into question the validity of the result. For instance,
-in 1976, Appel and Haken announced a positive proof of the four-color
-problem which was assisted in part by a computer program to perform
-the extensive case analysis for the reducible configurations. However,
-in the years that followed, several errors were uncovered which were
+in 1976, Appel and Haken announced a proof of the four-color problem
+which was assisted in part by a computer program to perform the
+extensive case analysis for the reducible configurations. However, in
+the years that followed, several errors were uncovered which were
 subsequently fixed. Eventually, in 2005, Gonthier et al. formalized
 the result in the Coq proof assistant, eliminating the need for
 trusting a program to check the cases.\cite{gonthier}
@@ -243,18 +231,18 @@ Here is an example of a proof rule for the dependent product formation
 rule in the Calculus of Constructions:
 
 \begin{prooftree}
-\AxiomC{$\Gamma \vdash A \typ U_i$}
-\AxiomC{$\Gamma, x:A \vdash B \typ U_j$}
+\AxiomC{$\Gamma \vdash A \typ \mathbb{U}_i$}
+\AxiomC{$\Gamma, x:A \vdash B \typ \mathbb{U}_j$}
 \RightLabel{(Prod)}
-\BinaryInfC{$\Gamma \vdash (\Pi x:A.B) \typ U_{\max(i,j)}$}
+\BinaryInfC{$\Gamma \vdash (\Pi x:A.B) \typ \mathbb{U}_{\max(i,j)}$}
 \end{prooftree}
 
-This inference rule shows that if $A$ has type $U_i$ and $B$ has type
-$U_j$ in the context $\Gamma$ extended with variable $x$ of type $A$,
-then the dependent product $\Pi x:A.B$ has type $U_{\max(i,j)}$. More
-information about universes can be found in \cite{ttfp}. An extension
-to the Predicative Calculus of Inductive Constructions can be found in
-\cite{cumulative}.
+This inference rule shows that if $A$ has type $\mathbb{U}_i$ and $B$
+has type $U_j$ in the context $\Gamma$ extended with variable $x$ of
+type $A$, then the dependent product $\Pi x:A.B$ has type
+$\mathbb{U}_{\max(i,j)}$. More information about universes can be
+found in \cite{ttfp}. An extension to the Predicative Calculus of
+Inductive Constructions can be found in \cite{cumulative}.
 
 Dependent type theory provides a foundation for modern proof
 assistants such as Coq and Lean, which use the Calculus of Inductive
@@ -266,7 +254,7 @@ correctness of algorithms.
 The calculi presented so far resembles a Hilbert-style calculus, we
 have only considered proof trees that derive well-typed terms. What
 distinguishes type theory from other logical calculi is the
-/computational behavior/ of the terms. Formally, there is a binary
+computational behavior of the terms. Formally, there is a binary
 /evaluation relation/ (often denoted as $\to_\beta$) over the terms. In
 the \lambda-calculus, $\to_\beta$ is defined as follows:
 
@@ -432,10 +420,6 @@ assertion regarding two terms $a$ and $b$ as:
 `$a$ and $b$ are equal elements of the type $A$'
 \end{center}
 
-Note that this is different from definitional equality, where
-convertible or terms that are equivalent under evaluation may be
-substituted freely within the type theory.
-
 In order to do this, we need to introduce a new type $I$ that can
 represent the equality of two elements of a given type. We can define
 $I$ as follows:
@@ -467,7 +451,10 @@ Leibnitz's law is derivable. That is, if we have a type $P(a)$ that
 depends on $a$ and $c : I(A,a,b)$, then we can conclude $P(b)$.
 \end{thm*}
 
-A proof of this theorem can be found in \cite{ttfp}.
+A proof of this theorem can be found in \cite{ttfp}. Note that this is
+different from definitional equality, where convertible or terms that
+are equivalent under evaluation may be substituted freely within the
+type theory.
 
 
 ** Interactions between axioms in dependent type theory
@@ -514,38 +501,33 @@ equivalent to $P=\top\vee((P=\top)\to\bot)$. From the lemma we have
 $P\vee(P\to\bot)$ thus we have $P\vee\neg P$, thus $P$ is decided.
 \end{proof}
 
-For completeness, we demonstrate how the 
+For completeness, Listing [[fig:coq_proof_lem1]] shows the formal proof of
+this theorem in Coq. For more discussion regarding the subtleties of
+LEM and its implications for mathematical results when not assumed,
+see \cite{bauer}.
 
-#+CAPTION: Formal Coq proof of Lemma 1.
+#+CAPTION: Formal Coq proof of LEM from PropExt and DecEq.
+#+NAME: fig:coq_proof_lem1
 #+BEGIN_src coq
-Definition eq_prop := forall (P Q : Prop), (P <-> Q) -> P = Q.
+Definition prop_ext := forall (P Q : Prop), (P <-> Q) -> P = Q.
 Definition dec_eq := forall (X : Type) (a b : X), a = b \/ a <> b.
 Definition lem := forall (P : Prop), P \/ ~ P.
 
-(* The small lemma *)
-Lemma small_lemma : forall (P : Prop), eq_prop -> P = (P = True).
+Lemma small_lemma : forall (P : Prop), prop_ext -> P = (P = True).
 Proof.
-  intros P eq_prop.
-  apply eq_prop.
-  split; intros.
-  - apply eq_prop; firstorder.
-  - rewrite H; firstorder.
+  intros P prop_ext.
+  apply prop_ext.
+  split; intros; [apply prop_ext|rewrite H]; firstorder.
 Qed.
 
-(* LEM follows from eq_prop and dec_eq *)
-Lemma eq_prop_deceq_lem : eq_prop -> dec_eq -> lem.
+(* LEM follows from prop_ext and dec_eq *)
+Lemma prop_ext_deceq_lem : prop_ext -> dec_eq -> lem.
 Proof.
   unfold dec_eq, lem.
-  intros eq_prop dec_eq P.
-  rewrite (small_lemma P).
-  - apply dec_eq.
-  - apply eq_prop.
+  intros prop_ext dec_eq P.
+  rewrite (small_lemma P); [apply dec_eq|apply prop_ext].
 Qed.
 #+END_src
-
-*We want to keep the logic constructive.* The interested reader may
-refer to \cite{bauer}.
-
 
 * Overview of Coq
 Coq\cite{coqart} is a proof assistant for writing mathematical
@@ -554,16 +536,16 @@ validity of their proofs. The logical foundation of Coq is the
 Calculus of Inductive Constructions. There are many resources and
 guides on various aspects of Coq applied in different contexts, such
 as program verification or mechanization of
-mathematics.\cite{cpdt}\cite{sergey}
+mathematics.\cite{cpdt}\cite{sergey}\cite{sf}
 
-Coq consists of two languages, \textit{Gallina} and
-\textit{Ltac}. Gallina is the specification language of Coq and can be
-thought of as the expressions in Coq. Gallina is purely functional and
-has support for dependent types and dependent pattern
-matching. \textit{Ltac} is the tactic language of Coq and is what is
-used to carry out formal proofs. An introduction can be found in
-\cite{tactic} and \cite{hurry}. It suffices to say that, from a
-usability standpoint, \textit{Ltac} commands operate on the current
+Coq consists of two languages, /Gallina/ and /Ltac/. Gallina is the
+specification language of Coq and can be thought of as the underlying
+term language. Gallina is purely functional and has support for
+dependent types and dependent pattern matching. /Ltac/ is the tactic
+language of Coq and is what is used to carry out formal proofs. An
+introduction to Ltac and Coq can be found in \cite{tactic} and
+\cite{hurry} respectively. It suffices to say that, from a usability
+standpoint, \textit{Ltac} commands operate on the current
 \textit{proof state}, which is the context consisting of hypothesis
 and a goal. The commands may introduce new hypotheses, clear existing
 ones, allow application of one hypothesis to another, discriminate a
@@ -628,45 +610,67 @@ flux.
 In this section, we will present how we carried out our own
 development of graph theory in Coq. Section [[Survey of graph theory
 developments in Coq]] will provide comparison as to how the design
-choices here fit in the formalization landscape.
+choices here fit in the formalization landscape. The full repository
+containing the definitions and proofs can be found in
+\cite{wigderson-siraben}. We also provide a printout of the source for
+the theory of subgraphs in Section [[Appendix A: A formal theory of
+graphs]].
 
 
+** Preliminary definitions
+We use the definition of graphs as defined in Volume 3 of \cite{sf} as
+a starting point. Listing [[fig:coq_graph_def]] shows the preliminary
+definitions of the development. We choose to have vertices be
+represented as positive integers, and choose an adjacency set
+representation. That is, a graph ~G~ is a finite map from positive
+integers to sets of positive integers, representing vertices and their
+adjacent vertices respectively.
 
-# When building any mathematical theory, one must start with the
-# definition of the objects of that theory.
+#+CAPTION: Definition of graphs in Coq.
+#+NAME: fig:coq_graph_def
+#+BEGIN_SRC coq
+Module E := PositiveOrderedTypeBits.
+Module S <: FSetInterface.S := PositiveSet.
+Module M <: FMapInterface.S := PositiveMap.
 
-# - graph theory is usually built on top of set theory
-# - but we're in type theory
-# - example of decidable equality
+Definition node := E.t.
+Definition nodeset := S.t.
+Definition nodemap: Type -> Type := M.t.
+Definition graph := nodemap nodeset.
 
-** Example lemma: maximum degree and subgraphs
-To illustrate the level of detail that is required in a formal proof
-and to motivate introspection into implicit assumptions about graphs,
-we will deconstruct a lemma about how maximum degrees interact with
-the subgraph relation.
+Definition adj (g: graph) (i: node) : nodeset :=
+  match M.find i g with Some a => a | None => S.empty end.
 
-*Lemma.* Let ~G'~ be a subgraph of ~G~. Then ~max_deg G' <= max_deg G~.
+Definition undirected (g: graph) :=
+   forall i j, S.In j (adj g i) -> S.In i (adj g j).
 
-*Proof.* When ~max_deg G'~ is zero, this is immediate. Otherwise, there is
-some vertex ~k~ of non-zero maximum degree in ~G'~. Since ~G'~ is a subgraph
-of ~G~, this vertex ~k~ is also in ~G~. Since ~G'~ is a subgraph of ~G~, the
-pointwise vertex sets of ~G'~ are subsets of the corresponding vertex
-set in ~G~. In particular, ~G'[k]~ is a subset of ~G[k]~. Let ~t~ be the
-vertex of (non-zero) maximum degree in ~G~. Since ~t~ is a vertex of
-maximum degree, the size of ~G[t]~ bounds the size of all other vertex
-sets, in particular ~G[k]~. Thus, ~max_deg G' = G'[k] <= G[k] <= G[t] =
-max_deg G~, as desired.
+Definition no_selfloop (g: graph) := forall i, ~ S.In i (adj g i).
 
-* Formalizing Wigderson's Algorithm in Coq
-To illustrate the usefulness of the theory so far built, we formalize
-various aspects of Wigderson's graph coloring algorithm in Coq.  A
-\(k\)-colorable graph is a graph that can be colored in \(k\) colors.
-Wigderson's algorithm aims to find a coloring approximation for
-3-colorable graphs. Since it is difficult to find an exact coloring,
-the algorithm will produce a valid coloring with at most $3\sqrt{n}$
-colors. If the graph is not 3-colorable, then either a valid
-approximation is returned or a certificate that the input was not
-3-colorable.
+Definition nodes (g: graph) := Mdomain g.
+#+END_SRC
+
+The ~adj~ function takes a graph, a vertex and returns a ~nodeset~ (which
+is empty if the vertex is not in the graph). The ~undirected~ predicate
+states that a graph is undirected if for every pair of vertices ~i~ and
+~j~, if ~j~ is in ~i~'s adjacency set then ~i~ is in ~j~'s adjacency
+set. ~no_selfloop~ states that a graph is irreflexive if ~i~ is never
+contained in its own vertex set. Finally, ~nodes~ takes the
+representation of the graph and extracts the key entries
+(resp. vertices) of the graph.
+
+For the rest of the development, we will present it backwards from
+formalizing a graph coloring algorithm so as to show the process of
+how we started with a high-level theorem and worked to find
+appropriate lemmas and structures.
+
+* Formalizing Wigderson's algorithm in Coq
+Our main contribution is progress towards the formalization of key
+lemmas for the proof of correctness of Wigderson's
+algorithm. Wigderson's algorithm\cite{wigderson} is an approximate
+graph coloring algorithm that aims to color a 3-colorable graph
+with at most $3\sqrt{n}$ colors in polynomial time. If the graph is
+not 3-colorable, then either a valid approximation is returned or the
+a certification that the input was not 3-colorable.
 
 Our development will closely follow the paper by
 Wigderson\cite{wigderson} in which he presents a proof of correctness
@@ -676,22 +680,19 @@ algorithm then its purely functional equivalent. Then we explore in
 detail key lemmas and theories that must be built up for us to reason
 about correctness of the algorithm.
 
-* Wigderson's Coloring Approximation Algorithm
+The idea of Wigderson's algorithm is to find vertices with degree of
+least \(k\). Finding these high-degree vertices allows us to color
+more vertices at once since we are able to 2-color the neighborhood
+for each of these vertices. Then we remove the colored vertices and
+continue this until no such high-degree vertices remain. Then color
+the remaining vertices with new colors. Then the pseudocode algorithm
+he is as follows where $\Delta(G)$ is the maximum degree of any vertex
+in $G$:
 
-For now, we will assume that any input graph is 3-colorable before we
-discuss robustness. The idea of Wigderson's algorithm is to find
-vertices with degree of least $k$. Finding these high-degree vertices
-allows us to color more vertices at once since we are able to 2-color
-the neighborhood for each of these vertices. Then we remove the
-colored vertices and continue this until no such high-degree vertices
-remain. Then color the remaining vertices with new colors. Then the
-pseudo-code algorithm he cites \cite{wigderson} is as follows where
-$\Delta(G)$ is the maximum degree of any vertex in $G$:
-
-\begin{algorithm}
-\caption{Widgerson's 3-coloring Approximation Algorithm}
+#+CAPTION: Wigderson's 3-coloring algorithm.
+#+BEGIN_algorithm
 \hspace*{\algorithmicindent}\textbf{Input:} A 3-colorable graph $G(V, E)$
-\begin{algorithmic}[1] 
+\begin{algorithmic}[1]
 \State $n \gets |V|$
 \State $i \gets 1$
 \While {$\Delta(G) \geq k$}
@@ -703,23 +704,52 @@ $\Delta(G)$ is the maximum degree of any vertex in $G$:
 \EndWhile
 \State color $G$ with colors $i, i + 1, i + 2, \dots, \Delta (G)$ and halt
 \end{algorithmic}
-\end{algorithm}
+#+END_algorithm
 
-For a 3-colorable graph, there exists some coloring in which each vertex has a color. The neighborhood of any vertex must be one of the two other colors, so the neighborhood is 2-colorable. We can find a 2-coloring easily in linear time by recursively forcing colors. We do this for vertices with higher degrees to eliminate as many colors as possible. Finally, we naively color the remaining vertices.
+** Informal proof of correctness
+In a 3-colorable graph, the neighborhood of any vertex must be one of
+the two other colors, so the neighborhood of that vertex is
+2-colorable. We can find a 2-coloring easily in linear time by
+recursively forcing colors. We do this for vertices with higher
+degrees to eliminate as many colors as possible. Finally, we naively
+color the remaining vertices.
 
-In the while loop, $i$ is incremented by $2$ and $3$ colors are used. This means there will be overlap between the final color used on the previous iteration and the first color used on the current iteration. This is possible since the final color assigned on each iteration is to $v$. Since the neighborhood of $v$, $N_G(v)$ was already colored, reusing this color for other vertices will not cause any contradictions. To make verification easier, we instead set the color of high-degree to color $1$ every iteration and use two unique colors for the neighborhoods.
+In the while loop, $i$ is incremented by $2$ and $3$ colors are
+used. This means there will be overlap between the final color used on
+the current iteration and the first color used on the next
+iteration. This is possible since the final color assigned on each
+iteration is to $v$. Since the neighborhood of $v$, $N_G(v)$ was
+already colored, reusing this color for other vertices will not cause
+any contradictions. To make verification easier, we fix the color of
+high-degree to color 1 on every iteration and use two unique colors
+for the neighborhoods.
 
-** Finding a Bound of Colors Used
+** Finding a bound on the number of colors used
+Let $n$ be the number of vertices in the graph. In a dense graph, it
+is possible that all vertices have at least degree \(k\), but each
+iteration also removes at least $k + 1$ vertices from the graph. We
+can remove at most $n$ vertices, so $(k+1)x \leq n$ where $x$ is the
+number of iterations, and thus $x \leq \frac{n}{k+1}$. Then once the
+loop terminates, then $\Delta(G) < k$, so we can use a polynomial time
+algorithm to color these vertices using at most $1 + \Delta(G) < 1 +
+k$ colors. Therefore, we use at most \(k\) colors to color these
+vertices. This gives an upper bound of $k + \frac{2n}{k}$ colors used
+since there are $2$ new colors used each iteration. We want to balance
+these two terms by selecting an appropriate \(k\) as follows
 
-Let $n$ be the number of vertices in the graph. In a dense graph, it is possible that all vertices have at least degree $k$, but each iteration also removes at least $k + 1$ vertices from the graph. We can remove at most $n$ vertices, so $(k+1)x \leq n$ where $x$ is the number of iterations, and thus $x \leq \frac{n}{k+1}$. Then once the loop terminates, then $\Delta(G) < k$, so we can use a polynomial time algorithm to color these vertices using at most $1 + \Delta(G) < 1 + k$ colors. Therefore, we use at most $k$ colors to color these vertices. This gives an upper bound of $k + \frac{2n}{k}$ colors used since there are $2$ new colors used each iteration. We want to balance these two terms by selecting an appropriate $k$ as follows
 \begin{align*}
     k &= \frac{2n}{k} \\
     k^2 &= 2n \\
     k &= \sqrt{2n}
 \end{align*}
-This leads to a bound of $\sqrt{2n} + \frac{2n}{\sqrt{2n}} = 2\sqrt{2n} = \sqrt{8}\sqrt{n} \approx 2.828\sqrt{n} = O(\sqrt{n})$. For sake of simplicity, we will use $k = \sqrt{n}$ as Wigderson did. This will give us a bound of $\sqrt{n} + \frac{2n}{\sqrt{n}} = 3\sqrt{n} = O(\sqrt{n})$.
 
-** Translation to Functional Algorithm
+This leads to a bound of $\sqrt{2n} + \frac{2n}{\sqrt{2n}} =
+2\sqrt{2n} = \sqrt{8}\sqrt{n} \approx 2.828\sqrt{n} =
+O(\sqrt{n})$. For sake of simplicity, we will use $k = \sqrt{n}$ as
+Wigderson did. This will give us a bound of $\sqrt{n} +
+\frac{2n}{\sqrt{n}} = 3\sqrt{n} = O(\sqrt{n})$. This proves the bound.
+
+** Translation to a functional algorithm
 We want to further explain the steps of the algorithm to convert this into a functional program to be used in Coq. We use the updated color assignment process we described and use the value $k = \sqrt{n}$. The algorithm can be described in two phases: the first where we color the high-degree vertices and their neighborhoods, and the second is coloring the remaining vertices. We first present the pseudocode for both Phase I and Phase II of the algorithm, each of which are divided into further subroutines.
 
 \begin{algorithm}
@@ -747,7 +777,7 @@ We want to further explain the steps of the algorithm to convert this into a fun
     \State $v \gets$ first vertex with degree at least $\sqrt{n}$
     \State $f \gets$ $f$ with $v$ assigned color $1$
     \State $f \gets$ \Call{two-color-neighborhood}{$f$}
-    \State $G \gets G - (v \cup N_G(v))$ 
+    \State $G \gets G - (v \cup N_G(v))$
     \State $f, G \gets$ \Call{phase-1}{$G$}
   \EndIf
   \State \Return $f, G$
@@ -784,11 +814,10 @@ In Phase I, the first function two-colors the connected component of a vertex. I
 
 In phase II, the goal is to color the remaining graph with $d+1$ colors where $d$ is the maximum degree of the graph. The first function removes (non-adjacent) vertices with degree $d$ and assigns them the same color. The second function simply applies this for all degrees from $d$ down to $0$ which will fully color the graph with $d+1$ colors.
 
-\newpage
 ** Understanding Correctness and Robustness
 We will now present the informal proofs of correctness to help us translate these ideas formally into Coq.
 \begin{lem}
-    The subgraph formed by the neighborhood of a vertex in a $n$-colorable graph is $n-1$-colorable.
+    The subgraph formed by the neighborhood of a vertex in a $n$-colorable graph is $(n-1)$-colorable.
     \begin{proof}
         Let $G$ be a $n$-colorable graph and let $v$ be an arbitrary vertex in $G$. Then there exists a coloring of $G$ using at most $n$ different colors. Vertex $v$ must be assigned some color $c$. Then all vertices adjacent to $v$ i.e. the neighborhood of $v$ will have colors different than $c$. Since the graph is $n$-colorable, one of these being $c$, the neighborhood can only use at most $n-1$ colors.
     \end{proof}
@@ -798,7 +827,7 @@ In the Phase I algorithm, we attempt to 2-color each neighborhood of
 high-degree vertices. For a 2-colorable graph, the 2-coloring function
 will work since we are simply forcing the choices logically. If this
 2-coloring fails, then the neighborhood is not two colorable, and by
-Lemma 1, this means the graph is not 3-colorable. In this case, we
+the lemma, this means the graph is not 3-colorable. In this case, we
 simply return this as a certificate that the input graph was not
 3-colorable. The color of the high-degree vertex will be assigned
 color $1$. For the next high-degree vertex, each of its neighbors
@@ -816,10 +845,116 @@ degree. Since we can assign the same color to each vertex in a
 process will succeed for $d-1$ and produce a \(d\)-coloring, then we
 remove each vertex with degree $d$. We cannot remove two neighboring
 vertices since the degree of the neighbors will decrease by 1 once
-remove. Therefore, we can use this color added to the \(d\)-coloring to
-form a $d+1$ coloring as desired. This gives us a total of
-$3\sqrt{n} + 1$ colors (we can reuse a color in the final step for
-exactly $3\sqrt{n}$).
+remove. Therefore, we can use this color added to the \(d\)-coloring
+to form a $d+1$ coloring as desired. This gives us a total of
+$3\sqrt{n} + 1$ colors (we can reuse a color in the final step to
+obtain $3\sqrt{n}$).
+
+
+* Wigderson's Coloring Approximation Algorithm
+
+For now, we will assume that any input graph is 3-colorable before we
+discuss robustness.
+
+
+
+We define a coloring as a map from the vertices to a set of
+colors. This coloring is considered a \(k\)-coloring for a set of size
+at at most \(k\). We say a graph is \(k\)-colorable if there exists a
+\(k\)-coloring.
+
+This means that the coloring is induced from the
+3-coloring, so we need to define this notion formally. With our
+definition, if we assume a graph is 3-colorable, then we can use the
+3-coloring given to us by Coq. Our goal is to only use these colorings
+for establishing definitions and lemmas and not as the coloring
+generated by the algorithm.
+
+We must define the concept of a neighborhood, but before we can do that, we need to a define a subgraph. This is simply a subset of vertices whose adjacency lists are subset of the adjacency lists of the entire graph. In Coq we have
+
+#+BEGIN_SRC coq
+Definition is_subgraph (g' g : graph) :=
+  S.Subset (nodes g') (nodes g) /\ forall v, S.Subset (adj g' v) (adj g v).
+#+END_SRC
+
+Then an induced subgraph is the subgraph generated from a subset of vertices in which each edge in the original graph between these vertices is contained in the subgraph.
+
+#+BEGIN_SRC coq
+Definition subgraph_of (g : graph) (s : S.t) : graph :=
+  M.fold (fun v adj g' => if S.mem v s then M.add v (S.inter s adj) g' else g')
+         g
+         empty_graph.
+#+END_SRC
+
+Combining these definitions, the neighborhood of a vertex $v$ is the induced subgraph formed by the set of neighbors of $v$ with $v$ removed.
+
+#+BEGIN_SRC coq
+Definition neighborhood (g : graph) v :=
+   remove_node v (subgraph_of g (neighbors g v)).
+#+END_SRC
+
+Now we define what a coloring is and what it mean for a coloring to be OK and complete on a graph. A coloring is a map from vertices to colors. A coloring $f$ is OK on a graph $g$ with respect to a palette $p$ if for every adjacent pair $i$, $j$, if $i$ is colored then $f(i)\in p$ and if $j$ is colored then $f(j)\in p$ and $f(i)\ne f(j)$. A coloring is complete if every vertex in $g$ has a color and the coloring is OK. This is an important distinction to make because the colorings that our algorithm builds up are partial and must be combined to eventually make a complete coloring.
+
+#+BEGIN_SRC coq
+Definition colors := S.t.
+Definition coloring := M.t node.
+Definition coloring_ok (palette: S.t) (g: graph) (f: coloring) :=
+ forall i j, S.In j (adj g i) ->
+     (forall ci, M.find i f = Some ci -> S.In ci palette) /\
+     (forall ci cj, M.find i f = Some ci -> M.find j f = Some cj -> ci<>cj).
+Definition coloring_complete (palette: colors) (g: graph) (f: coloring) :=
+ (forall i, M.In i g -> M.In i f) /\ coloring_ok palette g f.
+#+END_SRC
+
+Now, combining colorings and neighborhoods, we can talk about what it means to restrict a coloring on a neighborhood of a vertex.
+
+#+BEGIN_SRC coq
+Definition restrict_on_nbd (f : coloring) (g : graph) (v : node) :=
+  restrict f (nodes (neighborhood g v)).
+#+END_SRC
+
+
+** Organization of the theory
+The theory is organized into a series of modules, each of which is
+defined in a separate file.
+
+#+CAPTION: Statistics of our graph theory development.
+| *Filename*    | *Blank lines* | *Comment lines* | *Code lines* |
+|-------------+-------------+---------------+------------|
+| ~subgraph.v~  |         138 |           131 |       1145 |
+| ~coloring.v~  |          80 |           146 |        994 |
+| ~graph.v~     |         122 |           173 |        407 |
+| ~wigderson.v~ |          47 |           119 |        228 |
+| ~restrict.v~  |          14 |             6 |        181 |
+| ~munion.v~    |           6 |             6 |         63 |
+|-------------+-------------+---------------+------------|
+| *Total*       |         407 |           581 |       3018 |
+#+TBLFM: @>$2=vsum(@I..@II)::@>$3=vsum(@I..@II)::@>$4=vsum(@I..@II)
+
+
+** Example lemma: maximum degree and subgraphs
+To illustrate the level of detail that is required in a formal proof
+and to motivate introspection into implicit assumptions about graphs,
+we will deconstruct a lemma about how maximum degrees interact with
+the subgraph relation.
+
+*Lemma.* Let ~G'~ be a subgraph of ~G~. Then ~max_deg G' <= max_deg G~.
+
+*Proof.* When ~max_deg G'~ is zero, this is immediate. Otherwise, there is
+some vertex ~k~ of non-zero maximum degree in ~G'~. Since ~G'~ is a subgraph
+of ~G~, this vertex ~k~ is also in ~G~. Since ~G'~ is a subgraph of ~G~, the
+pointwise vertex sets of ~G'~ are subsets of the corresponding vertex
+set in ~G~. In particular, ~G'[k]~ is a subset of ~G[k]~. Let ~t~ be the
+vertex of (non-zero) maximum degree in ~G~. Since ~t~ is a vertex of
+maximum degree, the size of ~G[t]~ bounds the size of all other vertex
+sets, in particular ~G[k]~. Thus, ~max_deg G' = G'[k] <= G[k] <= G[t] =
+max_deg G~, as desired.
+
+* Formalizing Wigderson's Algorithm in Coq
+
+
+
+\newpage
 
 * Survey of graph theory developments in Coq
 ** Mathematical Components
@@ -872,7 +1007,8 @@ not they realize it''.
 \newpage
 * Appendix A: A formal theory of graphs
 We fully annotate one of the main files concerning subgraphs used in
-the formalization of graph theory.
+the formalization of graph theory. Every lemma shown here is fully
+formalized and can be viewed online [[https://github.com/siraben/coq-wigderson/blob/3ec8b9b704199da83383c65cc68fc63126d57b77/subgraph.v][here]].
 
 \begin{coqdoccode}
 \coqdocnoindent
@@ -922,7 +1058,7 @@ the formalization of graph theory.
 \item  the vertex set of \coqdocvar{g'} is a subset of the vertex set of \coqdocvar{g}
 
 \item  the adjacency set of every \coqdocvar{v} in \coqdocvar{g'} is a subset of adjacency set of every \coqdocvar{v} in \coqdocvar{g}
- 
+
 
 \end{itemize}
 \begin{coqdoccode}
@@ -999,7 +1135,7 @@ the formalization of graph theory.
 \subsubsection{Edges of an induced subgraph are a subset of the original graph}
 
  Note that this is defined pointwise: the adjacency set is a subset
-    for every vertex. 
+    for every vertex.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1022,14 +1158,14 @@ the formalization of graph theory.
 \subsubsection{Removing a distinct vertex from a graph}
 
  If \coqdocvar{i} and \coqdocvar{j} are distinct vertices then removing \coqdocvar{j} from the
-    graph doesn't affect \coqdocvar{i}'s membership. 
+    graph doesn't affect \coqdocvar{i}'s membership.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Lemma} \coqdocvar{remove\_node\_neq} : \coqdockw{\ensuremath{\forall}} \coqdocvar{g} \coqdocvar{i} \coqdocvar{j}, \coqdocvar{i} \ensuremath{\not=} \coqdocvar{j} \ensuremath{\rightarrow} \coqdocvar{M.In} \coqdocvar{i} \coqdocvar{g} \ensuremath{\leftrightarrow} \coqdocvar{M.In} \coqdocvar{i} (\coqdocvar{remove\_node} \coqdocvar{j} \coqdocvar{g}).\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
-If \coqdocvar{i} is in the graph with \coqdocvar{j} removed then \coqdocvar{i} is not equal to \coqdocvar{j}. 
+If \coqdocvar{i} is in the graph with \coqdocvar{j} removed then \coqdocvar{i} is not equal to \coqdocvar{j}.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1063,7 +1199,7 @@ If \coqdocvar{i} is in the graph with \coqdocvar{j} removed then \coqdocvar{i} i
 \item  first restrict the graph by \coqdocvar{S.diff} (\coqdocvar{Mdomain} \coqdocvar{g}) \coqdocvar{s}
 
 \item  then map subtracting s from every adj set
- 
+
 
 \end{itemize}
 \begin{coqdoccode}
@@ -1168,7 +1304,7 @@ If \coqdocvar{i} is in the graph with \coqdocvar{j} removed then \coqdocvar{i} i
 
  The (open) neighborhood of a vertex v in a graph consists of the
     subgraph induced by the vertices adjacent to v.  It does not
-    include v itself. 
+    include v itself.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1203,7 +1339,7 @@ If \coqdocvar{i} is in the graph with \coqdocvar{j} removed then \coqdocvar{i} i
 \coqdocemptyline
 \end{coqdoccode}
 If i is in the induced subgraph then i is in the set of inducing
-    vertices. 
+    vertices.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1238,7 +1374,7 @@ When is an edge in the induced subgraph?
 \item  if \coqdocvar{v} in $G|_S$ then \coqdocvar{v} in \coqdocvar{S}
 
 \item  if \coqdocvar{v} in \coqdocvar{S} and \coqdocvar{v} in \coqdocvar{G} then \coqdocvar{v} in $G|_S$
- 
+
 \end{itemize}
 
 
@@ -1447,7 +1583,7 @@ When is an edge in the induced subgraph?
 
  This subsection concerns functions that extract a list of vertices
     satisfying a degree criterion and incremental removal from the
-    graph. 
+    graph.
 
 \subsubsection{Extracting a vertex with a given degree iteratively}
 
@@ -1500,7 +1636,7 @@ When is an edge in the induced subgraph?
 \subsection{Subgraph series}
 
  A subgraph series is a list of subgraphs such that later elements
-    are subgraphs of former elements.  
+    are subgraphs of former elements.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1513,7 +1649,7 @@ When is an edge in the induced subgraph?
 \ensuremath{|} \coqdocvar{sg\_cons} : \coqdockw{\ensuremath{\forall}} \coqdocvar{g} \coqdocvar{g'} \coqdocvar{l}, \coqdocvar{is\_subgraph} \coqdocvar{g'} \coqdocvar{g} \ensuremath{\rightarrow} \coqdocvar{subgraph\_series} (\coqdocvar{g'} :: \coqdocvar{l}) \ensuremath{\rightarrow} \coqdocvar{subgraph\_series} (\coqdocvar{g} :: \coqdocvar{g'} :: \coqdocvar{l}).\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
-The subgraphs created by the extraction are a subgraph series 
+The subgraphs created by the extraction are a subgraph series
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1602,7 +1738,7 @@ The subgraphs created by the extraction are a subgraph series
 \subsubsection{Non-adjacency of max degree vertices after one step}
 
  If a vertex of max degree is removed from a graph then any vertex
-    with max degree in the new graph cannot be adjacent to it. 
+    with max degree in the new graph cannot be adjacent to it.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1619,7 +1755,7 @@ The subgraphs created by the extraction are a subgraph series
 \ensuremath{\lnot} (\coqdocvar{S.In} \coqdocvar{i} (\coqdocvar{adj} \coqdocvar{g} \coqdocvar{j})).\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
-The same as above, but for non-zero degree graphs 
+The same as above, but for non-zero degree graphs
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1656,7 +1792,7 @@ The same as above, but for non-zero degree graphs
 \end{coqdoccode}
 \subsection{Independent sets}
 
- An independent set is a set of vertices such that no two are adjacent. 
+ An independent set is a set of vertices such that no two are adjacent.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1809,7 +1945,7 @@ The same as above, but for non-zero degree graphs
 \subsubsection{Vertices in extraction are not in resulting graph but are in original graph}
 
  Later we can use this to show that the vertices after each round
-    of extraction are disjoint. 
+    of extraction are disjoint.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -1834,5 +1970,7 @@ The same as above, but for non-zero degree graphs
 \coqdocvar{S.Empty} (\coqdocvar{S.inter} \coqdocvar{s} \coqdocvar{s'}).\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
+
+
 \newpage
-\printbibliography
+\printbibliography[heading=bibintoc]
