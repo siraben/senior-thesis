@@ -67,7 +67,7 @@ Writing notes:
 \newpage
 * Introduction
 The formalist approach to mathematics has had a long history dating
-back to Euclid's /Elements/. In such developments, it is desirable to
+back to Euclid's /Elements/. In this approach, it is desirable to
 capture arguments and conclusions drawn from a finite set of axioms
 and rules of inference. Proof checking would then be a process that a
 mathematician could follow by hand. If the axioms and inferences were
@@ -81,9 +81,9 @@ in 1976, Appel and Haken announced a proof of the four-color problem
 which was assisted in part by a computer program to perform the
 extensive case analysis for the reducible configurations. However, in
 the years that followed, several errors were uncovered which were
-subsequently fixed. Eventually, in 2005, Gonthier et al. formalized
-the result in the Coq proof assistant, eliminating the need for
-trusting a program to check the cases.\cite{gonthier}
+corrected. Eventually, in 2005, Gonthier et al. formalized the result
+in the Coq proof assistant, eliminating the need for trusting a
+program to check the cases.\cite{gonthier}
 
 A similar series of events played out for the proof of the Kepler
 Conjecture, which concerns the optimal packing density for spheres in
@@ -94,7 +94,7 @@ formal proof of the Kepler conjecture was announced in 2017, using the
 Isabelle and HOL Light proof assistants.\cite{hales}
 
 Mechanization can also provide much-needed rigor to areas that contain
-many folklore results. In 2021, Forster et al. presented a mechanized
+many folklore results. Forster et al. presented in 2021 a mechanized
 proof of the time invariance thesis for the weak call-by-value
 \lambda-calculus, which states that the weak call-by-value
 \lambda-calculus and Turing machines can simulate each other with a
@@ -115,11 +115,9 @@ systems, communication networks, and more.
 
 The simplicity of a graph's underlying structure makes them a natural
 fit for mechanization. Graphs consist of vertices and edges, which can
-be represented as sets, functions or relations (as we shall see,
-representation can bring have subtle metatheoretic implications.) This
-simplicity allows for a clear formalization of the concepts and
-definitions of graph theory, and facilitates the automation of
-reasoning tasks.
+be represented as sets, functions, or relations. However, as we shall
+see, the choice of representation can have subtle metatheoretic
+implications.
 
 Graph algorithms are inherently computable, making them amenable to
 computer-assisted proofs. The algorithms for problems such as finding
@@ -138,8 +136,8 @@ reusable theory of graph coloring will contribute to opening up other
 avenues for future research.
 
 * Overview of dependent type theory
-Type theory has a rich history, dating back to the work of Russell and
-Whitehead's Principia Mathematica in the early 20^{th}
+Type theory has a rich history, dating back to Principia Mathematica
+by Russell and Whitehead's in the early 20^{th}
 century.\cite{whitehead} The aim of type theory is to provide a
 foundation for mathematics that avoids the paradoxes arising from
 naive set theory. In type theory, the objects of interest are not
@@ -214,8 +212,8 @@ type abstraction $\Lambda \alpha.e$ has the polymorphic type $\forall
 \alpha.\tau$.
 
 Dependent type theory extends System F by allowing types to depend on
-terms, enabling more expressivity. The Calculus of Constructions is an
-example of dependent type theory that adds the ability to define
+terms, enabling greater expressiveness. The Calculus of Constructions
+is an example of dependent type theory that adds the ability to define
 functions over types, creating a type hierarchy. The Calculus of
 Inductive Constructions extends the Calculus of Constructions with
 inductive types, allowing for formalization of mathematical structures
@@ -246,8 +244,8 @@ rule in the Calculus of Constructions:
 \end{prooftree}
 
 This inference rule shows that if $A$ has type $\mathbb{U}_i$ and $B$
-has type $U_j$ in the context $\Gamma$ extended with variable $x$ of
-type $A$, then the dependent product $\Pi x:A.B$ has type
+has type $\mathbb{U}_j$ in the context $\Gamma$ extended with variable
+$x$ of type $A$, then the dependent product $\Pi x:A.B$ has type
 $\mathbb{U}_{\max(i,j)}$. More information about universes can be
 found in \cite{ttfp}. An extension to the Predicative Calculus of
 Inductive Constructions can be found in \cite{cumulative}.
@@ -307,7 +305,7 @@ proof calculi and computational type systems.\cite{wadler} In
 propositional logic, a formula consists of either a propositional
 variable $X_n$ or a compound formula $A \land B$, $A \lor B$, $A
 \implies B$, $\lnot A$, where $A$ and $B$ are formulas. The
-Curry-Howard correspondence provides a way to map these logical
+Curry-Howard correspondence provides a way to map propositional
 formulas to types and lambda terms in a computational type system. The
 table below summarizes the correspondence between logic, types, and
 sets.
@@ -345,14 +343,13 @@ programs. Further details can be read in \cite{ttfp} and
 
 ** Constructing new types in type theory
 In type theory, it is possible to introduce new types by either
-defining them as inductive types or by defining them as dependent
-types. The ability to construct new types is a fundamental aspect of
-type theory that enables the encoding of complex mathematical
-structures.
+defining them as inductive types or as dependent types. The ability to
+construct new types is a fundamental aspect of type theory that
+enables the encoding of complex mathematical structures.
 
 In STLC, only base types and function types can be defined. Base types
 are fixed by the language, while function types are constructed using
-the arrow operator $\to$. For example, the type of a function that
+the arrow operator, $\to$. For example, the type of a function that
 takes an integer as input and returns a boolean as output can be
 written as $int \to bool$.
 
@@ -360,8 +357,8 @@ In System F, polymorphic types can be defined using universal
 quantification. For example, the identity function can be defined with
 type $\forall \alpha. \alpha \to \alpha$, where $\alpha$ is a type
 variable ranging over all possible types. This type captures the
-essence of the identity function, which takes any input of any type
-and returns the same value.
+essence of the identity function, which takes an input of any type and
+returns the same value.
 
 In the Calculus of Constructions, new types can be defined using
 dependent products, dependent sums, and inductive types. A dependent
@@ -374,7 +371,7 @@ type of functions that take an input $n$ representing the dimension of
 a vector and return an output of type $\mathbb{R}^n$ representing a
 vector in \(n\)-dimensional space. Note that if $B : A \to \mathbb{U}$
 is a constant function, the dependent product $\prod_{x:A} B(x)$ is
-the same as the function type $A \to B$.
+the same as the function type, $A \to B$.
 
 A dependent sum is a type of the form $\sum_{x:A} B(x)$, where $A$ is
 a type and $B(x)$ is a type that depends on $x$. This type can be
@@ -815,12 +812,12 @@ in $G$:
 #+END_algorithm
 
 ** Informal proof of correctness
-In a 3-colorable graph, the neighborhood of any vertex must be one of
-the two other colors, so the neighborhood of that vertex is
-2-colorable. We can find a 2-coloring easily in linear time by
-recursively forcing colors. We do this for vertices with higher
-degrees to eliminate as many colors as possible. Finally, we naively
-color the remaining vertices.
+In a 3-colorable graph, the neighborhood of any vertex must consist of
+one or both of the two other colors, so the neighborhood of that
+vertex is 2-colorable. We can find a 2-coloring easily in linear time
+by recursively forcing colors. We do this for vertices with higher
+degrees to eliminate as many colors as possible. Finally, we color the
+remaining vertices in a straightforward manner.
 
 In the while loop, $i$ is incremented by $2$ and $3$ colors are
 used. This means there will be overlap between the final color used on
@@ -834,13 +831,13 @@ for the neighborhoods.
 
 ** Finding a bound on the number of colors used
 Let $n$ be the number of vertices in the graph. In a dense graph, it
-is possible that all vertices have at least degree \(k\), but each
-iteration also removes at least $k + 1$ vertices from the graph. We
+is possible that all vertices have at least degree \(k\). However,
+each iteration removes at least $k + 1$ vertices from the graph. We
 can remove at most $n$ vertices, so $(k+1)x \leq n$ where $x$ is the
-number of iterations, and thus $x \leq \frac{n}{k+1}$. Then once the
-loop terminates, then $\Delta(G) < k$, so we can use a polynomial time
-algorithm to color these vertices using at most $1 + \Delta(G) < 1 +
-k$ colors. Therefore, we use at most \(k\) colors to color these
+number of iterations, and thus $x \leq \frac{n}{k+1}$. Once the loop
+terminates, $\Delta(G) < k$, so we can use a polynomial time algorithm
+to color these vertices using at most $1 + \Delta(G) < 1 + k$
+colors. Therefore, we use at most \(k\) colors to color these
 vertices. This gives an upper bound of $k + \frac{2n}{k}$ colors used
 since there are $2$ new colors used each iteration. We want to balance
 these two terms by selecting an appropriate \(k\) as follows
@@ -858,14 +855,14 @@ Wigderson did. This will give us a bound of $\sqrt{n} +
 \frac{2n}{\sqrt{n}} = 3\sqrt{n} = O(\sqrt{n})$. This proves the bound.
 
 ** Translation to a functional algorithm
-We want to further explain the steps of the algorithm to convert this
-into a functional program to be used in Coq. We use the updated color
-assignment process we described and use the value $k = \sqrt{n}$. The
-algorithm can be described in two phases: the first where we color the
+We aim to further detail the algorithm steps to convert this into a
+functional program for use in Coq. We use the updated color assignment
+process we described and use the value $k = \sqrt{n}$. The algorithm
+can be described in two phases: the first where we color the
 high-degree vertices and their neighborhoods, and the second is
-coloring the remaining vertices. We first present the pseudocode for
-both Phase I and Phase II of the algorithm, each of which are divided
-into further subroutines.
+coloring the remaining vertices. We present the pseudocode for both
+Phase I and Phase II of the algorithm, with each phase divided into
+further subroutines.
 
 \begin{algorithm}
 \caption{Phase I Algorithm}
@@ -901,15 +898,15 @@ into further subroutines.
 \end{algorithmic}
 \end{algorithm}
 
-In Phase I, the first function 2-colors the connected component of a
-vertex. It arbitrarily selects a color and forces the adjacent
-vertices until we must arbitrarily select another color for the next
-connected component. The next function applies this to the whole
-neighborhood of a vertex. Finally, the Phase I function selects
-high-degree vertices and colors them and their neighborhoods until
-there are no more high-degree vertices remaining. This leaves us with
-a graph with no high degree vertex in which we will then use for Phase
-II.
+In Phase I, the first function 2-colors the connected components of a
+vertex. It arbitrarily selects a color and colors the adjacent
+vertices, then arbitrarily selects another color for the next
+connected component when necessary. The next function applies this to
+the whole neighborhood of a vertex. Finally, the Phase I function
+selects high-degree vertices and colors them and their neighborhoods
+until there are no more high-degree vertices remaining. This leaves us
+with a graph with no high degree vertex in which we will then use for
+Phase II.
 
 \begin{algorithm}
 \caption{Phase II Algorithm}
@@ -937,7 +934,7 @@ II.
 
 In Phase II, the goal is to color the remaining graph with $d+1$
 colors where $d$ is the maximum degree of the graph. The first
-function removes (non-adjacent) vertices with degree $d$ and assigns
+function removes non-adjacent vertices with degree $d$ and assigns
 them the same color. The second function simply applies this for all
 degrees from $d$ down to $0$ which will fully color the graph with
 $d+1$ colors.
@@ -973,7 +970,6 @@ color in the final step, we obtain $3\sqrt{n}$).
 
 
 ** Constructing the formalization
-# now explain how things are formalized
 Now that we have established context, we continue with the
 formalization, as shown in Listing [[fig:coloring_formal]]. A ~coloring~ is
 defined to be a finite map from vertices to colors. ~coloring_ok~ states
@@ -990,9 +986,9 @@ vertices that are colored are assigned some color in the palette
 (again allowing for partial colorings). The reason why we want to
 split the definitions up in this way is that we may need different
 conditions at different stages of developments. When we are coloring a
-graph, the coloring constructed /so far/ is not a complete coloring,
+graph, the coloring constructed so far is not a complete coloring;
 thus we must allow ourselves to talk about partial colorings that are
-consistent thus far. of course, the definition of ~n_coloring~ makes it
+consistent thus far. Of course, the definition of ~n_coloring~ makes it
 easy to define what a 3-coloring is, and we define ~three_coloring~ for
 convenience. The full development may be found in the ~coloring.v~ file
 in \cite{wigderson-siraben}.
@@ -1011,9 +1007,9 @@ adjacency set of any ~v~ in ~g'~ is a subset of the adjacency set of ~v~ in
 ~g~. The ~neighbors~ of ~v~ in ~g~ is simply its adjacency set. To remove a
 vertex ~v~ from a graph ~g~, we remove the vertex and its adjacency set
 from the graph, then go through all the adjacency sets of all the
-vertices and remove ~v~ from it. To induce a subgraph of ~g~ from a vertex
-set ~s~, we start with an empty graph and for each vertex ~v~ and its
-adjacency set ~adj~, we check if ~v~ is a member of ~s~ and if so, add it
+vertices and remove ~v~ from them. To induce a subgraph of ~g~ from a
+vertex set ~s~, we start with an empty graph. For each vertex ~v~ and its
+adjacency set ~adj~, we check if ~v~ is a member of ~s~; if so, we add it
 and the intersection of its adjacency set in ~g~ to the new graph.
 
 Finally, the ~neighborhood~ of ~v~ in ~g~ is the result of inducing a
@@ -1062,17 +1058,17 @@ Definition neighborhood (g : graph) v :=
 #+END_SRC
 \newpage
 ** Phase I Lemmas
-We first want to establish that the neighborhood of a vertex in a
-3-colorable graph is 2-colorable. This seems simple, but due to the
-definition of a mapping, this is quite challenging. We first show that
-a 3-colorable neighborhood and vertex ~v~ will induce a 3-coloring that
-only uses 2 colors. We need to show that this coloring can be
-transformed into a 2-coloring. Even though the coloring does not
-change, the information at the type level changes, we go from
+First, we want to establish that the neighborhood of a vertex in a
+3-colorable graph is 2-colorable. Although this may seem simple, due
+to the definition of a mapping, this is quite challenging. We first
+show that a 3-colorable neighborhood and vertex ~v~ will induce a
+3-coloring that only uses 2 colors. We need to show that this coloring
+can be transformed into a 2-coloring. Even though the coloring does
+not change, the information at the type level changes; we go from
 ~coloring_complete p g f~ to ~coloring_complete (S.remove ci p)
 (neighborhood g v) (restrict_on_nbd f g v)~, meaning we can use the
-fact that ~f~ is uses one less color and it is a complete coloring on
-the neighborhood. Here is a more general statement of this lemma.
+fact that ~f~ is uses one less color and that it is a complete coloring
+on the neighborhood. Below is a more general statement of this lemma.
 
 \begin{lem}
     The subgraph formed by the neighborhood of a vertex in a $n$-colorable graph is $(n-1)$-colorable.
@@ -1081,7 +1077,7 @@ the neighborhood. Here is a more general statement of this lemma.
     \end{proof}
 \end{lem}
 
-The formal statement of this lemma is shown in Listing
+The formal statement of this lemma appears in in Listing
 [[fig:nbd_Sn_formal]]. It reads: for any graph ~g~, coloring ~f~, set of
 colors ~p~, and natural number ~n~, if the coloring ~d~ is complete on ~g~
 using colors ~p~, and ~f~ is a coloring that uses $n + 1$ colors, then for
@@ -1104,17 +1100,18 @@ Lemma nbd_Sn_colorable_n :
                              (restrict_on_nbd f g v).
 #+END_SRC
 
-In this example, we see that a formal elaboration of a statement makes
-explicit what was implicit before. The coloring ~f~ was not mentioned in
-the original statement at all. However, when we mention that a graph
-is \((n+1)\)-colorable then make a claim about the colorability of one
-of its subgraphs (the neighborhood of ~v~), we often are referring to
-the same coloring, or some other coloring derived from it. Explicitly,
-the new coloring on the neighborhood is a restriction of the original
-coloring, and the palette is now different since the neighborhood of a
-vertex does not include the vertex itself.  The formal proof of this
-lemma may be found in \cite{wigderson-siraben}. The overall structure
-of the formal proof follows the informal one.
+In this example, it is evident that a formal elaboration of a
+statement makes explicit what was implicit before. The coloring ~f~ was
+not mentioned in the original statement at all. However, when we
+mention that a graph is \((n+1)\)-colorable then make a claim about
+the colorability of one of its subgraphs (the neighborhood of ~v~), we
+are often referring to the same coloring, or some other coloring
+derived from it. Explicitly, the new coloring on the neighborhood is a
+restriction of the original coloring, and the palette is now different
+since the neighborhood of a vertex does not include the vertex itself.
+The formal proof of this lemma may be found in
+\cite{wigderson-siraben}. The overall structure of the formal proof
+follows the informal one.
 
 We also show the contrapositive of this statement (this is immediate
 since $A\to B$ implies $\neg B\to \neg A$ constructively). This shows
@@ -1122,20 +1119,20 @@ that if the neighborhood is not colorable, then the graph is not
 3-colorable. We can use this later to show that if our 2-coloring
 algorithm fails, then the graph is not 3-colorable. This allows us to
 avoid using the 2-coloring given to us by Coq in showing that the
-2-coloring function is valid. This will also allow us to prove
+2-coloring function is valid. This will further enable us to prove
 robustness of the algorithm.
 
-This lemma allows us to 2-color the neighborhood of any vertex in a
-3-colorable graph. We also need some more lemmas for Phase I of the
-algorithm. We need to show that removing a high degree vertex reduces
-the size of the graph by 1, and that removing its neighborhood reduces
-the size of the graph by at least $\sqrt K$.
+This lemma enables us to 2-color the neighborhood of any vertex in a
+3-colorable graph. We also require additional lemmas for Phase I of
+the algorithm. We need to show that removing a high degree vertex
+reduces the size of the graph by 1, and that removing its neighborhood
+reduces the size of the graph by at least $\sqrt K$.
 
 We also want to show that high-degree vertex selected will not be
-adjacent to each other. This would imply that each neighborhood we
-select is entirely disjoint. This will also imply that so we can
-remove $\sqrt{K}$ new vertices at each step. We show that this means
-the process will terminate and leave the remaining graph with maximum
+adjacent to each other. This implies that each neighborhood we select
+is entirely disjoint. This will also imply that we can remove
+$\sqrt{K}$ new vertices at each step. We show that this means the
+process will terminate and leave the remaining graph with maximum
 degree $\sqrt{K}-1$.
 
 Finally, we build properties about combining colorings of
@@ -1149,10 +1146,10 @@ colorings and apply induction for the whole process.
 In Phase II, we color a graph with maximum degree $d$ with $d+1$
 colors.  The coloring proceeds by repeatedly selecting and removing
 vertices of highest degree in the graph, then coloring them all the
-same, then we go to the next highest degree until there are no more
-uncolored vertices.  Thus, we have to prove that process of selecting
-highest degree vertices (while removing them) never selects adjacent
-vertices.  This is captured by the following statement:
+same, then we proceed with the next highest degree until there are no
+more uncolored vertices.  Thus, we have to prove that process of
+selecting highest degree vertices (while removing them) never selects
+adjacent vertices. The following statement captures this:
 
 #+BEGIN_SRC coq
 Lemma remove_max_deg_adj : forall (g : graph) (i j : node) (d : nat),
@@ -1168,6 +1165,8 @@ Lemma remove_max_deg_adj : forall (g : graph) (i j : node) (d : nat),
 #+END_SRC
 
 We then show that this holds even after repeated removals.
+
+# continue proofreading from here
 
 * Implementing Wigderson's algorithm
 We have described the phases of the algorithm is pseudocode, but we
