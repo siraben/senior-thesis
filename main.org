@@ -137,11 +137,11 @@ avenues for future research.
 
 * Overview of dependent type theory
 Type theory has a rich history, dating back to Principia Mathematica
-by Russell and Whitehead's in the early 20^{th}
-century.\cite{whitehead} The aim of type theory is to provide a
-foundation for mathematics that avoids the paradoxes arising from
-naive set theory. In type theory, the objects of interest are not
-sets, but rather types and terms over those types.
+by Russell and Whitehead in the early 20^{th} century.\cite{whitehead}
+The aim of type theory is to provide a foundation for mathematics that
+avoids the paradoxes arising from naive set theory. In type theory,
+the objects of interest are not sets, but rather types and terms over
+those types.
 
 Simply Typed Lambda Calculus (STLC) is a type theory that was
 introduced by Church in the 1940s. It consists of rules of inference
@@ -675,7 +675,7 @@ well-typed terms correspond to proofs. From a usability perspective,
 the user is more concerned about the state of their proof and what
 tactic to perform next, as they construct the underlying term.
 
-** Proof Engineering
+** Proof engineering
 In the last few decades, the practice of /proof engineering/ has emerged
 whereby formal developments are carried out and maintained at
 scale. Many proof engineering techniques take inspiration from work in
@@ -1326,13 +1326,13 @@ through coercion.
 One key aspect of graph theory formalization is the representation of
 paths. In the library, a path is a nonempty sequence of vertices with
 an edge between every pair of adjacent elements. An irredundant path
-has all distinct vertices. The Mathematical Components library
-includes a predicate ~path~ and a function ~last~ for formalizing the
+has all distinct vertices. The Mathematical Components library has
+list-manipulating functions such as ~last~ that can help formalize the
 notion of an xy-path in a digraph.
 
 However, the authors found that the standard representation of paths
 using lists could be cumbersome in some cases. To address this issue,
-they introduced a custom data structure called path, designed
+they introduced a custom data structure called ~path~, designed
 specifically to represent paths in graphs. This data structure
 simplifies the representation of paths, making it more convenient to
 work with in formal proofs.
