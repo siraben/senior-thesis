@@ -20,15 +20,15 @@
 \newcommand{\tred}{\twoheadrightarrow_\beta}
 
 #+BEGIN_abstract
-Despite the rich theory and extensive applications of graph theory in
-computer science and mathematics, formal developments of graph theory
-have mostly been restricted to specific applications or definitions of
-graphs. In this work we seek to catalog various approaches to
-formalization of graph theory that have been taken in the literature,
-in particular, the motivations underlying the formalization, the
-theoretical design choices taken and the strength of the
-conclusions. We also present a our own novel formal theory of graphs
-to prove correctness of Wigderson's graph coloring algorithm.
+In this work, we focus on Wigderson's graph coloring algorithm and its
+formal correctness, while also exploring the broader context of graph
+theory formalization in computer science and mathematics. Although
+graph theory boasts a rich history and extensive applications, its
+formal developments have often been limited to specific use-cases or
+graph definitions. We provide a comprehensive review of various
+formalization approaches found in the literature, examining their
+motivations, theoretical design choices, and the robustness of their
+conclusions.
 #+END_abstract
 
 #+BEGIN_comment
@@ -116,7 +116,7 @@ systems, communication networks, and more.
 The simplicity of a graph's underlying structure makes them a natural
 fit for mechanization. Graphs consist of vertices and edges, which can
 be represented as sets, functions or relations (as we shall see,
-representation can bring have subtle metatheoretic implications). This
+representation can bring have subtle metatheoretic implications.) This
 simplicity allows for a clear formalization of the concepts and
 definitions of graph theory, and facilitates the automation of
 reasoning tasks.
@@ -130,11 +130,11 @@ solution. This computability enables the use of proof assistants,
 which can help verify the correctness of the algorithms and proofs.
 
 * Overview of dependent type theory
-Type theory has a rich history, dating back to the work of Bertrand
-Russell and Alfred North Whitehead's Principia Mathematica in the
-early 20^{th} century.\cite{whitehead} The aim of type theory is to
-provide a foundation for mathematics that avoids the paradoxes arising
-from naive set theory. In type theory, the objects of interest are not
+Type theory has a rich history, dating back to the work of Russell and
+Whitehead's Principia Mathematica in the early 20^{th}
+century.\cite{whitehead} The aim of type theory is to provide a
+foundation for mathematics that avoids the paradoxes arising from
+naive set theory. In type theory, the objects of interest are not
 sets, but rather types and terms over those types.
 
 Simply Typed Lambda Calculus (STLC) is a type theory that was
@@ -596,6 +596,82 @@ match l with
 end.
 #+END_SRC
 
+** Writing Proofs in Coq: Tactics and Proof Terms
+Tactics are Ltac commands used to manipulate the proof state in order
+to construct a proof term for a given goal. The proof term is an
+expression in the Gallina language that, when constructed correctly,
+will establish the validity of the goal. As the user applies tactics
+to the proof state, Coq builds up a proof term incrementally. Once the
+proof term is complete and the proof state is solved, the proof is
+considered complete.
+
+Here is an overview of some common tactics in Coq:
+
+- ~intros~: introduce variables and assumptions from the goal into the
+  context. It moves premises from the goal into the hypothesis context
+  and binds variables as needed.
+- ~apply~: used to apply a given hypothesis or lemma to the current
+  goal. If the applied hypothesis or lemma matches the goal or part of
+  the goal, Coq will generate new subgoals for any premises that have
+  not been satisfied.
+- ~rewrite~: rewrite the goal or a hypothesis using a given equality. It
+  can be used with the ~->~ or ~<-~ symbols to rewrite from left to right
+  or right to left, respectively.
+- ~simpl~: simplify the goal by performing beta-reduction,
+  delta-reduction, and other simplification steps on the current goal.
+- ~induction~: perform induction on a given variable, which can be
+  helpful when proving properties about inductive types.
+- ~destruct~: perform case analysis on a given variable, splitting the
+  proof state into cases based on the constructors of the inductive
+  type.
+
+Here is an example of a simple proof in Coq using tactics:
+
+#+BEGIN_SRC coq
+Theorem add_0_r : forall n : nat, n + 0 = n.
+Proof.
+  intros n.             (* Introduce the variable n *)
+  induction n as [|n']. (* Perform induction on n *)
+  - simpl.              (* Base case: simplify *)
+    reflexivity.        (* Prove 0 + 0 = 0 *)
+  - simpl.              (* Inductive case: simplify *)
+    rewrite IHn'.       (* Rewrite using induction hypothesis *)
+    reflexivity.        (* Prove (S n') + 0 = S n' *)
+Qed.
+#+END_SRC
+
+We obtain the following proof term.
+
+#+BEGIN_SRC coq
+add_0_r =
+    fun n : nat =>
+    nat_ind (fun n0 : nat => n0 + 0 = n0) eq_refl
+      (fun (n' : nat) (IHn' : n' + 0 = n') =>
+       eq_ind_r (fun n0 : nat => S n0 = S n') eq_refl IHn') n
+         : forall n : nat, n + 0 = n
+#+END_SRC
+
+Where the types of ~nat_ind~, ~eq_refl~ and ~eq_ind_r~ are as follows:
+
+#+BEGIN_SRC coq
+nat_ind : forall P : nat -> Prop,
+  P 0 -> (forall n : nat, P n -> P (S n)) ->
+  forall n : nat, P n
+
+eq_refl : forall (A : Type) (x : A), x = x
+
+eq_ind_r : forall (A : Type) (x : A) (P : A -> Type) (p : P x),
+    forall y : A, x = y -> P y
+#+END_SRC
+
+~nat_ind~ is the induction principle for the ~nat~ type. ~eq_refl~ is the
+proof of reflexivity for equality. ~eq_ind_r~ allows us to rewrite a
+proof term using an equality. As outlined in Section [[Curry-Howard
+correspondence]], the under the Curry-Howard correspondence,
+well-typed terms correspond to proofs. From a usability perspective,
+the user is more concerned about the state of their proof and what
+tactic to perform next, as they construct the underlying term.
+
 ** Proof Engineering
 In the last few decades, the practice of /proof engineering/ has emerged
 whereby formal developments are carried out and maintained at
@@ -604,7 +680,33 @@ software engineering.\cite{klein2014proof} An extensive survey can be
 found in \cite{ringer2019qed}. Although the logical foundations of
 proof assistants are for the most part fixed, the practices and
 conventions surrounding the development of theories are constantly in
-flux.
+flux.  As proof engineering techniques mature and evolve, they can
+greatly enhance the efficiency and maintainability of large-scale
+formal developments. Some important aspects of proof engineering
+include:
+
+/Modularization/: Organizing formal developments into smaller,
+self-contained modules can make proofs more manageable and
+understandable. This can involve structuring theories in a
+hierarchical manner, using namespaces, and creating reusable
+libraries.
+
+/Automation/: Developing custom tactics and decision procedures can
+greatly reduce the manual effort required to carry out
+proofs. Automation can also help to manage complexity and improve the
+overall efficiency of the proof process.
+
+/Documentation/: Providing clear documentation for formal developments
+is crucial to ensure that the intended meaning of definitions,
+theorems, and proofs is well understood. This includes writing
+informative comments, using meaningful naming conventions, and
+providing high-level overviews of the proof structure.
+
+/Proof refactoring/: As in software engineering, refactoring proofs can
+help to improve their maintainability, readability, and
+performance. This may involve simplifying complex proofs, generalizing
+specific results, or even changing the underlying definitions to make
+them more amenable to formal reasoning.
 
 * Building graph theory in Coq
 In this section, we will present how we carried out our own
@@ -614,7 +716,7 @@ choices here fit in the formalization landscape. The full repository
 containing the definitions and proofs can be found in
 \cite{wigderson-siraben}. We also provide a printout of the source for
 the theory of subgraphs in Section [[Appendix A: A formal theory of
-graphs]].
+subgraphs]].
 
 
 ** Preliminary definitions
@@ -815,7 +917,137 @@ In Phase I, the first function two-colors the connected component of a vertex. I
 In phase II, the goal is to color the remaining graph with $d+1$ colors where $d$ is the maximum degree of the graph. The first function removes (non-adjacent) vertices with degree $d$ and assigns them the same color. The second function simply applies this for all degrees from $d$ down to $0$ which will fully color the graph with $d+1$ colors.
 
 ** Understanding Correctness and Robustness
-We will now present the informal proofs of correctness to help us translate these ideas formally into Coq.
+We will now present the informal proofs of correctness to help us
+translate these ideas formally into Coq. In the Phase I algorithm, we
+attempt to 2-color each neighborhood of high-degree vertices. For a
+2-colorable graph, the 2-coloring function will work since we are
+simply forcing the choices logically. If this 2-coloring fails, then
+the neighborhood is not two colorable, and by the lemma, this means
+the graph is not 3-colorable. In this case, we simply return this as a
+certificate that the input graph was not 3-colorable. The color of the
+high-degree vertex will be assigned color $1$. For the next
+high-degree vertex, each of its neighbors cannot be a high-degree
+vertex already used since this would mean the vertex would have been
+colored. Thus, we can reuse the color $1$. Each step uses $\sqrt{n}$
+new vertices, so this means there are at most $\frac{n}{\sqrt{n}} =
+\sqrt{n}$ iterations. This means there are $2\sqrt{n} + 1$ colors in
+this process. Since the loop terminates when there are no more
+vertices of at least degree $\sqrt{n}$, we know that after this
+process the uncolored vertices will have degree less than $\sqrt{n}$
+i.e. maximum degree is at most $\sqrt{n} - 1$. The final process
+simply requires assigning different colors for each degree. Since we
+can assign the same color to each vertex in a 1-colorable graph, Phase
+II will work by induction. If we assume the process will succeed for
+$d-1$ and produce a \(d\)-coloring, then we remove each vertex with
+degree $d$. We cannot remove two neighboring vertices since the degree
+of the neighbors will decrease by 1 once remove. Therefore, we can use
+this color added to the \(d\)-coloring to form a $d+1$ coloring as
+desired. This gives us a total of $3\sqrt{n} + 1$ colors (reusing a
+color in the final step, we obtain $3\sqrt{n}$).
+
+
+** Constructing the formalization
+# now explain how things are formalized
+Now that we have established context, we continue with the
+formalization, as shown in Listing [[fig:coloring_formal]]. A ~coloring~ is
+defined to be a finite map from vertices to colors. ~coloring_ok~ states
+that for a given palette of colors, graph and coloring, the coloring
+is considered to be OK if for every edge ~i~ to ~j~, if ~i~ is assigned some
+color, the color must be in the palette, and the colors of ~j~ and ~i~ (if
+they are both colored) are not the same. Note that this allows our
+colorings to be partial. ~coloring_complete~ states that for a given
+palette of colors, a graph and a coloring, every vertex in the graph
+is assigned some color and the entire graph is OK with respect to the
+coloring. Finally, ~n_coloring~ states that a given coloring is an
+~n~-coloring if the cardinality of the set of colors used is ~n~ and all
+vertices that are colored are assigned some color in the palette
+(again allowing for partial colorings). The reason why we want to
+split the definitions up in this way is that we may need different
+conditions at different stages of developments. When we are coloring a
+graph, the coloring constructed /so far/ is not a complete coloring,
+thus we must allow ourselves to talk about partial colorings that are
+consistent thus far. of course, the definition of ~n_coloring~ makes it
+easy to define what a 3-coloring is, and we define ~three_coloring~ for
+convenience. The full development may be found in the ~coloring.v~ file
+in \cite{wigderson-siraben}.
+
+A key component of Wigderson's algorithm is coloring the neighborhood
+of vertices of a given degree. This means that we must be able to
+reason about the degree of an arbitrary vertex, its neighborhood, how
+we construct the coloring, and so on. We start by building a theory of
+subgraphs. The theory of subgraphs ends up being the bulk of our
+development, and we provide a full listing of all the lemmas
+formalized in Section [[Appendix A: A formal theory of
+subgraphs]]. Listing [[fig:subgraph_formal]] shows the key formalization
+of subgraphs used in our development. ~g'~ is a subgraph of ~g~ if the
+vertex set of ~g'~ is a subset of the vertex set of ~g~ and if the
+adjacency set of any ~v~ in ~g'~ is a subset of the adjacency set of ~v~ in
+~g~. The ~neighbors~ of ~v~ in ~g~ is simply its adjacency set. To remove a
+vertex ~v~ from a graph ~g~, we remove the vertex and its adjacency set
+from the graph, then go through all the adjacency sets of all the
+vertices and remove ~v~ from it. To induce a subgraph of ~g~ from a vertex
+set ~s~, we start with an empty graph and for each vertex ~v~ and its
+adjacency set ~adj~, we check if ~v~ is a member of ~s~ and if so, add it
+and the intersection of its adjacency set in ~g~ to the new graph.
+
+Finally, the ~neighborhood~ of ~v~ in ~g~ is the result of inducing a
+subgraph of ~g~ from its neighbors and then removing ~v~ from the
+resulting subgraph.
+
+#+CAPTION: Definitions for coloring in Coq.
+#+NAME: fig:coloring_formal
+#+BEGIN_SRC coq
+Definition colors := S.t.
+Definition coloring := M.t node.
+
+Definition coloring_ok (palette: colors) (g: graph) (f: coloring) :=
+ forall i j, S.In j (adj g i) ->
+     (forall ci, M.find i f = Some ci -> S.In ci palette) /\
+     (forall ci cj, M.find i f = Some ci -> M.find j f = Some cj -> ci<>cj).
+
+
+Definition coloring_complete (palette: colors) (g: graph) (f: coloring) :=
+  (forall i, M.In i g -> M.In i f) /\ coloring_ok palette g f.
+
+Definition n_coloring (f : coloring) (p : colors) (n : nat) :=
+  S.cardinal p = n /\ forall v c, M.find v f = Some c -> S.In c p.
+
+Definition three_coloring (f : coloring) p := n_coloring f p 3.
+#+END_SRC
+
+#+CAPTION: Definitions for subgraphs in Coq.
+#+NAME: fig:subgraph_formal
+#+BEGIN_SRC coq
+Definition is_subgraph (g' g : graph) :=
+  S.Subset (nodes g') (nodes g) /\ forall v, S.Subset (adj g' v) (adj g v).
+
+Definition neighbors (g : graph) v := adj g v.
+
+Definition remove_node (v: node) (g: graph) : graph :=
+  M.map (S.remove v) (M.remove v g).
+
+Definition subgraph_of (g : graph) (s : S.t) :=
+  M.fold (fun v adj g' => if S.mem v s then M.add v (S.inter s adj) g' else g')
+         g
+         empty_graph.
+
+Definition neighborhood (g : graph) v :=
+  remove_node v (subgraph_of g (neighbors g v)).
+#+END_SRC
+\newpage
+** Phase I Lemmas
+We first want to establish that the neighborhood of a vertex in a
+3-colorable graph is 2-colorable. This seems simple, but due to the
+definition of a mapping, this is quite challenging. We first show that
+a 3-colorable neighborhood and vertex ~v~ will induce a 3-coloring that
+only uses 2 colors. We need to show that this coloring can be
+transformed into a 2-coloring. Even though the coloring does not
+change, the information at the type level changes, we go from
+~coloring_complete p g f~ to ~coloring_complete (S.remove ci p)
+(neighborhood g v) (restrict_on_nbd f g v)~, meaning we can use the
+fact that ~f~ is uses one less color and it is a complete coloring on
+the neighborhood. Here is a more general statement of this lemma.
+
 \begin{lem}
     The subgraph formed by the neighborhood of a vertex in a $n$-colorable graph is $(n-1)$-colorable.
     \begin{proof}
@@ -823,100 +1055,165 @@ We will now present the informal proofs of correctness to help us translate thes
     \end{proof}
 \end{lem}
 
-In the Phase I algorithm, we attempt to 2-color each neighborhood of
-high-degree vertices. For a 2-colorable graph, the 2-coloring function
-will work since we are simply forcing the choices logically. If this
-2-coloring fails, then the neighborhood is not two colorable, and by
-the lemma, this means the graph is not 3-colorable. In this case, we
-simply return this as a certificate that the input graph was not
-3-colorable. The color of the high-degree vertex will be assigned
-color $1$. For the next high-degree vertex, each of its neighbors
-cannot be a high-degree vertex already used since this would mean the
-vertex would have been colored. Thus, we can reuse the color $1$. Each
-step uses $\sqrt{n}$ new vertices, so this means there are at most
-$\frac{n}{\sqrt{n}} = \sqrt{n}$ iterations. This means there are
-$2\sqrt{n} + 1$ colors in this process. Since the loop terminates when
-there are no more vertices of at least degree $\sqrt{n}$, we know that
-after this process the uncolored vertices will have degree less than
-$\sqrt{n}$ i.e. maximum degree is at most $\sqrt{n} - 1$. The final
-process simply requires assigning different colors for each
-degree. Since we can assign the same color to each vertex in a
-1-colorable graph, Phase II will work by induction. If we assume the
-process will succeed for $d-1$ and produce a \(d\)-coloring, then we
-remove each vertex with degree $d$. We cannot remove two neighboring
-vertices since the degree of the neighbors will decrease by 1 once
-remove. Therefore, we can use this color added to the \(d\)-coloring
-to form a $d+1$ coloring as desired. This gives us a total of
-$3\sqrt{n} + 1$ colors (we can reuse a color in the final step to
-obtain $3\sqrt{n}$).
+The formal statement of this lemma is shown in Listing
+[[fig:nbd_Sn_formal]]. It reads: for any graph ~g~, coloring ~f~, set of
+colors ~p~ and natural number ~n~, if the coloring ~d~ is complete on ~g~
+using colors ~p~, and ~f~ is a coloring that uses $n + 1$ colors, then for
+any vertex ~v~ with color ~ci~, if we restrict ~f~ to the neighborhood on ~v~
+and the result is an ~n~-coloring using the colors
+$\texttt{p}\setminus\{\texttt{ci}\}$, then this restricted coloring is
+complete on the neighborhood.
 
-
-* Wigderson's Coloring Approximation Algorithm
-
-For now, we will assume that any input graph is 3-colorable before we
-discuss robustness.
-
-
-
-We define a coloring as a map from the vertices to a set of
-colors. This coloring is considered a \(k\)-coloring for a set of size
-at at most \(k\). We say a graph is \(k\)-colorable if there exists a
-\(k\)-coloring.
-
-This means that the coloring is induced from the
-3-coloring, so we need to define this notion formally. With our
-definition, if we assume a graph is 3-colorable, then we can use the
-3-coloring given to us by Coq. Our goal is to only use these colorings
-for establishing definitions and lemmas and not as the coloring
-generated by the algorithm.
-
-We must define the concept of a neighborhood, but before we can do that, we need to a define a subgraph. This is simply a subset of vertices whose adjacency lists are subset of the adjacency lists of the entire graph. In Coq we have
-
+#+CAPTION: Formal statement of a lemma on \((n+1)\)-colorability
+#+LABEL: fig:nbd_Sn_formal
 #+BEGIN_SRC coq
-Definition is_subgraph (g' g : graph) :=
-  S.Subset (nodes g') (nodes g) /\ forall v, S.Subset (adj g' v) (adj g v).
+Lemma nbd_Sn_colorable_n :
+  forall (g : graph) (f : coloring) (p : colors) (n : nat),
+   coloring_complete p g f ->
+   n_coloring f p (S n) ->
+   forall v ci, M.find v f = Some ci ->
+           n_coloring (restrict_on_nbd f g v) (S.remove ci p) n
+        /\ coloring_complete (S.remove ci p)
+                             (neighborhood g v)
+                             (restrict_on_nbd f g v).
 #+END_SRC
 
-Then an induced subgraph is the subgraph generated from a subset of vertices in which each edge in the original graph between these vertices is contained in the subgraph.
+In this example, we see that a formal elaboration of a statement makes
+explicit what was implicit before. The coloring ~f~ was not mentioned in
+the original statement at all. However, when we mention that a graph
+is \((n+1)\)-colorable then make a claim about the colorability of one
+of its subgraphs (the neighborhood of ~v~), we often are referring to
+the same coloring, or some other coloring derived from it. Explicitly,
+the new coloring on the neighborhood is a restriction of the original
+coloring, and the palette is now different since the neighborhood of a
+vertex does not include the vertex itself.  The formal proof of this
+lemma may be found in \cite{wigderson-siraben}. The overall structure
+of the formal proof follows the informal one.
+
+We also show the contrapositive of this statement (this is immediate
+since $A\to B$ implies $\neg B\to \neg A$ constructively). This shows
+that if the neighborhood is not colorable, then the graph is not
+3-colorable. We can use this later to show that if our 2-coloring
+algorithm fails, then the graph is not 3-colorable. This allows us to
+avoid using the 2-coloring given to us by Coq in showing that the
+2-coloring function is valid. This will also allow us to prove
+robustness of the algorithm.
+
+This lemma allows us to 2-color the neighborhood of any vertex in a
+3-colorable graph. We also need some more lemmas for Phase I of the
+algorithm. We need to show that removing a high degree vertex reduces
+the size of the graph by 1, and that removing its neighborhood reduces
+the size of the graph by at least $\sqrt K$.
+
+We also want to show that high-degree vertex selected will not be
+adjacent to each other. This would imply that each neighborhood we
+select is entirely disjoint. This will also imply that so we can
+remove $\sqrt{K}$ new vertices at each step. We show that this means
+the process will terminate and leave the remaining graph with maximum
+degree $\sqrt{K}-1$.
+
+Finally, we build properties about combining colorings of
+neighborhoods together. We can combine them individually to reform the
+entire graph. In particular, we want to use this fact to show that the
+partial colorings of neighborhoods will form a valid coloring when
+combined together. We can show this works for any two disjoint partial
+colorings and apply induction for the whole process.
+
+** Phase II Lemmas
+In phase 2, we color a graph with maximum degree $d$ with $d+1$
+colors.  The coloring proceeds by repeatedly selecting and removing
+vertices of highest degree in the graph, then coloring them all the
+same, then we go to the next highest degree until there are no more
+uncolored vertices.  Thus, we have to prove that process of selecting
+highest degree vertices (while removing them) never selects adjacent
+vertices.  This is captured by the following statement:
 
 #+BEGIN_SRC coq
-Definition subgraph_of (g : graph) (s : S.t) : graph :=
-  M.fold (fun v adj g' => if S.mem v s then M.add v (S.inter s adj) g' else g')
-         g
-         empty_graph.
+Lemma remove_max_deg_adj : forall (g : graph) (i j : node) (d : nat),
+    (d > 0) ->
+    undirected g ->
+    no_selfloop g ->
+    max_deg g = d ->
+    M.In i g ->
+    M.In j g ->
+    degree g j = d ->
+    degree (remove_node i g) j = d ->
+    ~ (S.In j (adj g i)).
 #+END_SRC
 
-Combining these definitions, the neighborhood of a vertex $v$ is the induced subgraph formed by the set of neighbors of $v$ with $v$ removed.
+We then show that this holds even after repeated removals.
+
+* Implementing Wigderson's Algorithm in Coq
+We have described the phases of the algorithm is pseudocode, but we now must translate this into Coq. We will do this in a manner corresponding to our lemmas. We will apply these lemmas to our functions and prove correctness and robustness.
+
+** Phase I
+We postulate the existence of a 2-coloring function that takes a graph
+$g$, a vertex $v$, two colors $c_1$ and $c_2$ and 2-colors the
+neighborhood of $v$, or fails. Note that the function would not take
+any proof information, we would have to separately prove that if the
+coloring failed then it would imply the neighborhood of $v$ is not
+2-colorable.
 
 #+BEGIN_SRC coq
-Definition neighborhood (g : graph) v :=
-   remove_node v (subgraph_of g (neighbors g v)).
+Definition two_color_nbd (g : graph) (v : node) (c1 c2 : E.t) : option coloring.
+Admitted.
 #+END_SRC
 
-Now we define what a coloring is and what it mean for a coloring to be OK and complete on a graph. A coloring is a map from vertices to colors. A coloring $f$ is OK on a graph $g$ with respect to a palette $p$ if for every adjacent pair $i$, $j$, if $i$ is colored then $f(i)\in p$ and if $j$ is colored then $f(j)\in p$ and $f(i)\ne f(j)$. A coloring is complete if every vertex in $g$ has a color and the coloring is OK. This is an important distinction to make because the colorings that our algorithm builds up are partial and must be combined to eventually make a complete coloring.
+The following theorem states the completeness of the 2-coloring
+algorithm with distinct colors $c_1, c_2$ on a neighborhood of a
+vertex $v$ if there existed some coloring $m$ such that the vertex was
+assigned some distinct color $c_3$ while $m$ completely colored the
+rest of the graph. Note that are not able to actually ``look inside''
+the definition of $m$, merely the proof that it exists.
 
 #+BEGIN_SRC coq
-Definition colors := S.t.
-Definition coloring := M.t node.
-Definition coloring_ok (palette: S.t) (g: graph) (f: coloring) :=
- forall i j, S.In j (adj g i) ->
-     (forall ci, M.find i f = Some ci -> S.In ci palette) /\
-     (forall ci cj, M.find i f = Some ci -> M.find j f = Some cj -> ci<>cj).
-Definition coloring_complete (palette: colors) (g: graph) (f: coloring) :=
- (forall i, M.In i g -> M.In i f) /\ coloring_ok palette g f.
+Lemma two_color_nbd_complete : forall (g : graph) (v : node) c1 c2 c3,
+    c1 <> c2 ->
+    c1 <> c3 ->
+    c2 <> c3 ->
+    no_selfloop g ->
+    undirected g ->
+    M.In v g ->
+    (exists m, M.find v m = Some c3 /\
+    coloring_complete (SP.of_list [c1;c2;c3]) g m) ->
+    coloring_complete (SP.of_list [c1;c2])
+                      (subgraph_of g (nodes (neighborhood g v)))
+                      (two_color_nbd g v c1 c2).
 #+END_SRC
 
-Now, combining colorings and neighborhoods, we can talk about what it means to restrict a coloring on a neighborhood of a vertex.
+** Phase II
+We fully define the second phase of the coloring. First we write a
+function to iteratively extract a vertex of a given degree and remove
+it from a graph. Separately we also prove that if the degree d that
+was given is the max degree then \texttt{extract\_vertices\_deg}
+exhausts all the vertices of max degree and the graph returned has
+maximum degree of one less. Here, we have to provide a proof of
+termination using the ~measure~ keyword to Coq, since non-terminating
+functions are not allowed in Coq. We use the fact that the size of the
+graph is decreasing at each step.
 
 #+BEGIN_SRC coq
-Definition restrict_on_nbd (f : coloring) (g : graph) (v : node) :=
-  restrict f (nodes (neighborhood g v)).
+Function extract_vertices_deg (g : graph) (d : nat) {measure M.cardinal g}
+    : list (node * graph) * graph :=
+  match extract_deg_vert_dec g d with
+  | inl v =>
+      let (l, g') := extract_vertices_deg (remove_node (`v) g) d in
+      ((`v, g') :: l, g')
+  | inr _ => (nil, g)
+  end.
+
+Function phase2 (g : graph) {measure max_deg g} : coloring * graph :=
+  match max_deg g with
+  | 0 => (constant_color (nodes g) 1, (@M.empty _))
+  | S n => let (ns, g') := extract_vertices_deg g (S n) in
+          let ns' := SP.of_list (map fst ns) in
+          let (f', g'') := phase2 g' in
+          (Munion (constant_color ns' (Pos.of_nat (S n))) f', g'')
+  end.
 #+END_SRC
 
-
-** Organization of the theory
-The theory is organized into a series of modules, each of which is
-defined in a separate file.
+We provide a summary of the statistics of the development in the
+following table:
 
 #+CAPTION: Statistics of our graph theory development.
 | *Filename*    | *Blank lines* | *Comment lines* | *Code lines* |
@@ -930,28 +1227,6 @@ defined in a separate file.
 |-------------+-------------+---------------+------------|
 | *Total*       |         407 |           581 |       3018 |
 #+TBLFM: @>$2=vsum(@I..@II)::@>$3=vsum(@I..@II)::@>$4=vsum(@I..@II)
-
-
-** Example lemma: maximum degree and subgraphs
-To illustrate the level of detail that is required in a formal proof
-and to motivate introspection into implicit assumptions about graphs,
-we will deconstruct a lemma about how maximum degrees interact with
-the subgraph relation.
-
-*Lemma.* Let ~G'~ be a subgraph of ~G~. Then ~max_deg G' <= max_deg G~.
-
-*Proof.* When ~max_deg G'~ is zero, this is immediate. Otherwise, there is
-some vertex ~k~ of non-zero maximum degree in ~G'~. Since ~G'~ is a subgraph
-of ~G~, this vertex ~k~ is also in ~G~. Since ~G'~ is a subgraph of ~G~, the
-pointwise vertex sets of ~G'~ are subsets of the corresponding vertex
-set in ~G~. In particular, ~G'[k]~ is a subset of ~G[k]~. Let ~t~ be the
-vertex of (non-zero) maximum degree in ~G~. Since ~t~ is a vertex of
-maximum degree, the size of ~G[t]~ bounds the size of all other vertex
-sets, in particular ~G[k]~. Thus, ~max_deg G' = G'[k] <= G[k] <= G[t] =
-max_deg G~, as desired.
-
-* Formalizing Wigderson's Algorithm in Coq
-
 
 
 \newpage
@@ -1005,7 +1280,7 @@ not they realize it''.
 * Conclusion and future work
 
 \newpage
-* Appendix A: A formal theory of graphs
+* Appendix A: A formal theory of subgraphs
 We fully annotate one of the main files concerning subgraphs used in
 the formalization of graph theory. Every lemma shown here is fully
 formalized and can be viewed online [[https://github.com/siraben/coq-wigderson/blob/3ec8b9b704199da83383c65cc68fc63126d57b77/subgraph.v][here]].
