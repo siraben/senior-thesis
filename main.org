@@ -69,10 +69,10 @@ Writing notes:
 The formalist approach to mathematics has had a long history dating
 back to Euclid's /Elements/. In this approach, it is desirable to
 capture arguments and conclusions drawn from a finite set of axioms
-and rules of inference. Proof checking would then be a process that a
-mathematician could follow by hand. If the axioms and inferences were
-applied correctly, then that is all that is needed to establish the
-validity of a result.
+and rules of inference. Proof checking would then become a process
+that a mathematician could follow by hand. If the axioms and
+inferences were applied correctly, then that is all that is needed to
+establish the validity of a result.
 
 However, in recent years, there have been cases where some
 mathematical proofs were considered infeasible for a human to verify,
@@ -88,13 +88,13 @@ program to check the cases.\cite{gonthier}
 A similar series of events played out for the proof of the Kepler
 Conjecture, which concerns the optimal packing density for spheres in
 three dimensions. Hales announced a proof of the Kepler conjecture
-involving lengthy case analysis with computer
+that involved lengthy case analysis with computer
 assistance. Subsequently, with Hales leading the Flyspeck project, a
 formal proof of the Kepler conjecture was announced in 2017, using the
 Isabelle and HOL Light proof assistants.\cite{hales}
 
 Mechanization can also provide much-needed rigor to areas that contain
-many folklore results. Forster et al. presented in 2021 a mechanized
+many folklore results. Forster et al., in 2021, presented a mechanized
 proof of the time invariance thesis for the weak call-by-value
 \lambda-calculus, which states that the weak call-by-value
 \lambda-calculus and Turing machines can simulate each other with a
@@ -1169,18 +1169,18 @@ We then show that this holds even after repeated removals.
 # continue proofreading from here
 
 * Implementing Wigderson's algorithm
-We have described the phases of the algorithm is pseudocode, but we
+We have described the phases of the algorithm in pseudocode, but we
 now must translate this into Coq. We will do this in a manner
 corresponding to our lemmas. We will apply these lemmas to our
 functions to prove correctness and robustness.
 
 ** Phase I
 We postulate the existence of a 2-coloring function that takes a graph
-$g$, a vertex $v$, two colors $c_1$ and $c_2$ and 2-colors the
-neighborhood of $v$, or fails. Note that the function would not take
-any proof information, we would have to separately prove that if the
-coloring failed then it would imply the neighborhood of $v$ is not
-2-colorable.
+$g$, a vertex $v$, two colors $c_1$ and $c_2$, and assigns a
+2-coloring to the neighborhood of $v$, or fails. Note that the
+function would not take any proof information. We would have to
+separately prove that if the coloring failed, then it would imply the
+neighborhood of $v$ is not 2-colorable.
 
 #+BEGIN_SRC coq
 Definition two_color_nbd (g : graph) (v : node) (c1 c2 : E.t) : option coloring.
@@ -1191,8 +1191,8 @@ The following theorem states the completeness of the 2-coloring
 algorithm with distinct colors $c_1, c_2$ on a neighborhood of a
 vertex $v$ if there existed some coloring $m$ such that the vertex was
 assigned some distinct color $c_3$ while $m$ completely colored the
-rest of the graph. Note that are not able to actually ``look inside''
-the definition of $m$, merely the proof that it exists.
+rest of the graph. Note that we are not able to actually ``look
+inside'' the definition of $m$, merely the proof that it exists.
 
 #+BEGIN_SRC coq
 Lemma two_color_nbd_complete : forall (g : graph) (v : node) c1 c2 c3,
@@ -1210,15 +1210,15 @@ Lemma two_color_nbd_complete : forall (g : graph) (v : node) c1 c2 c3,
 #+END_SRC
 
 ** Phase II
-We fully define the second phase of the coloring. First we write a
+We fully define the second phase of the algorithm. First we write a
 function to iteratively extract a vertex of a given degree and remove
-it from a graph. Separately we also prove that if the degree d that
-was given is the max degree then \texttt{extract\_vertices\_deg}
-exhausts all the vertices of max degree and the graph returned has
+it from a graph. Separately, we also prove that if the degree d that
+was given is the max degree, then \texttt{extract_vertices_deg}
+exhausts all the vertices of max degree, and the graph returned has a
 maximum degree of one less. Here, we have to provide a proof of
-termination using the ~measure~ keyword to Coq, since non-terminating
-functions are not allowed in Coq. We use the fact that the size of the
-graph is decreasing at each step.
+termination using the ~measure~ keyword in Coq, since Coq does not allow
+non-terminating functions. We use the fact that the size of the graph
+is decreasing at each step.
 
 #+BEGIN_SRC coq
 Function extract_vertices_deg (g : graph) (d : nat) {measure M.cardinal g}
@@ -1240,8 +1240,8 @@ Function phase2 (g : graph) {measure max_deg g} : coloring * graph :=
   end.
 #+END_SRC
 
-We provide a summary of the statistics of the development in the
-following table:
+We provide a summary of the development statistics in the following
+table.
 
 #+CAPTION: Statistics of our graph theory development.
 | *Filename*    | *Blank lines* | *Comment lines* | *Code lines* |
@@ -1260,9 +1260,10 @@ following table:
 \newpage
 
 * Survey of graph theory developments in Coq
-In this section, we provide a comprehensive survey of formal theory of
-graphs in Coq with other work, examining their motivations,
-theoretical design choices, and the robustness of their conclusions.
+In this section, we provide a comprehensive survey of the formal
+theory of graphs in Coq, along with other work, examining their
+motivations, theoretical design choices, and the robustness of their
+conclusions.
 
 ** Mathematical Components
 The Mathematical Components library\cite{mathcomp} in Coq is a library
@@ -1291,12 +1292,12 @@ In the context of the Four Color Theorem\cite{gonthier}, proof by
 reflection is employed in various parts of the proof, such as checking
 the colorability of hypermaps, testing the validity of contract
 sequences, and verifying properties of special maps. A contract
-coloring and contract sequence are concepts used when dealing with
-reducible configurations for the main proof. The Four Color Theorem
-states that any map on a plane or a sphere can be colored with at most
-four colors such that no two adjacent regions have the same color. In
-the proof of the theorem, hypermaps are used to represent the
-structure of maps, and contracts are a way of simplifying the
+coloring and contract sequence are both concepts used when dealing
+with reducible configurations for the main proof. The Four Color
+Theorem states that any map on a plane or a sphere can be colored with
+at most four colors such that no two adjacent regions have the same
+color. In the proof of the theorem, hypermaps are used to represent
+the structure of maps, and contracts are a way of simplifying the
 hypermaps.
 
 ** Doczkal and Pous
@@ -1366,8 +1367,8 @@ rule are summarized, with supporting theorems to ease rule
 application. The spatial representations, the ~Localize~ rule, and the
 supporting theorems together form a spatial graph library.
 
-CertiGraph is one of the most comprehensive general developments of
-graph theory in Coq for algorithmic purposes. In the development of
+CertiGraph is one of the most comprehensive and general developments
+of graph theory in Coq for algorithmic purposes. In the development of
 CertiGraph, special attention is paid to the definition of graphs to
 retain as much generality as possible. The base construction of the
 graph, called ~PreGraph~, is a record parameterized over types ~Vertex~
@@ -1412,8 +1413,8 @@ correctness of the graph coloring algorithm. Additionally, we have
 reviewed various other formalizations and compared them, shedding
 light on their strengths and limitations.
 
-There are multiple paths for future work that can extend our
-research. These include finishing the verification of Wigderson's
+There are multiple avenues for future research that can extend our
+work. These include finishing the verification of Wigderson's
 algorithm, creating a reusable library for graph coloring, verifying
 the time complexity of Wigderson's algorithm or other graph coloring
 algorithms with respect to a specific cost model, and conducting
@@ -1422,7 +1423,7 @@ graph theory.
 
 By establishing a solid foundation for the formalization of graph
 theory, our work contributes to the advancement of knowledge in the
-field and opens up new opportunities for further research. We hope
+field, and opens up new opportunities for further research. We hope
 that our investigation will inspire future efforts towards a more
 comprehensive and rigorous understanding of graph theory and its
 applications, ultimately resulting in the development of more reliable
