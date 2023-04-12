@@ -8,27 +8,17 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.7.0
 
-    - name: Install Emacs and LaTeX
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y emacs-nox texlive-full
-
-    - name: Install GNU Stow
-      run: |
-        sudo apt-get install -y stow
+    - name: Install Nix
+      uses: cachix/install-nix-action@v20
 
     - name: Clone dotfiles
-      uses: actions/checkout@v2
-      with:
-        repository: siraben/dotfiles
-        path: dotfiles
+      run: git clone https://github.com/siraben/dotfiles.git
 
-    - name: Stow Emacs configuration
+    - name: Symlink Emacs configuration
+      run: ln -s $PWD/dotfiles/emacs/.emacs.d $HOME/.emacs.d
+
+    - name: Build PDF
       run: |
-        cd dotfiles
-        stow emacs
-
-    - name: Generate PDF
-      run: make
+        NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/22.11.tar.gz nix-shell --run "make"
