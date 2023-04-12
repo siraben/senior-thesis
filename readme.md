@@ -26,10 +26,6 @@ To generate the PDF file from the `.org` source file, simply run
 make. This will generate the `.tex` file using Emacs, and then compile
 it to a PDF using `latexmk`.
 
-If you have customized your Emacs configuration and want to use your
-own configuration file, you can modify the `EMACS_INIT_FILE` variable
-in the `Makefile`.
-
 ## Credits
 This work was written by Siraphob (Ben) Phipathananunth.
 
