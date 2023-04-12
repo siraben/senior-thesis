@@ -1,9 +1,9 @@
 { pkgs ? import <nixpkgs> {} }:
 
 pkgs.mkShell {
-  buildInputs = [
-    pkgs.emacs
-    pkgs.stow
-    pkgs.texlive.combined.scheme-full
+  buildInputs = with pkgs; [
+    emacs
+    texlive.combined.scheme-full
+    biber
   ];
 }
