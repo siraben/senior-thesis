@@ -1,0 +1,15 @@
+.DS_Store
+# Emacs backup files
+*~
+
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.pdf
+*.toc
+*.vtc
+*.fdb_latexmk
+*.fls

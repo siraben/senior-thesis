@@ -1,0 +1,34 @@
+name: Generate PDF
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Emacs and LaTeX
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y emacs-nox texlive-full
+
+    - name: Install GNU Stow
+      run: |
+        sudo apt-get install -y stow
+
+    - name: Clone dotfiles
+      uses: actions/checkout@v2
+      with:
+        repository: siraben/dotfiles
+        path: dotfiles
+
+    - name: Stow Emacs configuration
+      run: |
+        cd dotfiles
+        stow emacs
+
+    - name: Generate PDF
+      run: make
