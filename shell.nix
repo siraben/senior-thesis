@@ -4,6 +4,6 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.emacs
     pkgs.stow
-    pkgs.texlive.combined.scheme-medium
+    pkgs.texlive.combined.scheme-full
   ];
 }

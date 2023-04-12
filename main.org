@@ -1213,10 +1213,10 @@ Lemma two_color_nbd_complete : forall (g : graph) (v : node) c1 c2 c3,
 We fully define the second phase of the algorithm. First we write a
 function to iteratively extract a vertex of a given degree and remove
 it from a graph. Separately, we also prove that if the degree d that
-was given is the max degree, then \texttt{extract_vertices_deg}
-exhausts all the vertices of max degree, and the graph returned has a
-maximum degree of one less. Here, we have to provide a proof of
-termination using the ~measure~ keyword in Coq, since Coq does not allow
+was given is the max degree, then ~extract_vertices_deg~ exhausts all
+the vertices of max degree, and the graph returned has a maximum
+degree of one less. Here, we have to provide a proof of termination
+using the ~measure~ keyword in Coq, since Coq does not allow
 non-terminating functions. We use the fact that the size of the graph
 is decreasing at each step.
 
@@ -1255,7 +1255,6 @@ table.
 |-------------+-------------+---------------+------------|
 | *Total*       |         407 |           581 |       3018 |
 #+TBLFM: @>$2=vsum(@I..@II)::@>$3=vsum(@I..@II)::@>$4=vsum(@I..@II)
-
 
 \newpage
 

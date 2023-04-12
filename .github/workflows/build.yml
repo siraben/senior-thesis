@@ -13,12 +13,6 @@ jobs:
     - name: Install Nix
       uses: cachix/install-nix-action@v20
 
-    - name: Clone dotfiles
-      run: git clone https://github.com/siraben/dotfiles.git
-
-    - name: Symlink Emacs configuration
-      run: ln -s $PWD/dotfiles/emacs/.emacs.d $HOME/.emacs.d
-
     - name: Build PDF
       run: |
         NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/22.11.tar.gz nix-shell --run "make"
