@@ -1,4 +1,6 @@
 # Formalizing graph theory in type theory
+![Build status](https://github.com/siraben/senior-thesis/actions/workflows/build.yml/badge.svg)
+
 This repository contains the source files for a formalization of graph
 theory in type theory, including a review of various formalization
 approaches found in the literature, an implementation of Wigderson's
