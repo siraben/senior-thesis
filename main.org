@@ -1392,7 +1392,6 @@ general as they are not restricted to finite types, allowing for
 greater flexibility in handling various graph types and
 graph-manipulating programs.
 
-\newpage
 * Conclusion and future work
 In this thesis, we have embarked on an in-depth exploration of
 Wigderson's graph coloring algorithm, focusing on its formal
