@@ -20,7 +20,6 @@ conclusions.
 ## Requirements
 - Emacs 26 or later
 - LaTeX distribution (e.g., TeX Live, MacTeX)
-- GNU Stow (optional)
 
 ## Usage
 To generate the PDF file from the `.org` source file, simply run
