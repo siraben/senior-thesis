@@ -2,7 +2,7 @@
 #+AUTHOR: Siraphob (Ben) Phipathananunth
 #+OPTIONS: toc:nil
 #+LATEX_CLASS: scrartcl
-#+LATEX_HEADER: \usepackage[margin=1in]{geometry}
+#+LATEX_HEADER: \usepackage[letterpaper,margin=1in]{geometry}
 #+LATEX_HEADER: \usepackage{bussproofs}
 #+LATEX_HEADER: \usepackage{amsthm}
 #+LATEX_HEADER: \usepackage{coqdoc}
@@ -20,15 +20,15 @@
 \newcommand{\tred}{\twoheadrightarrow_\beta}
 
 #+BEGIN_abstract
-Despite the rich theory and extensive applications of graph theory in
+Despite the rich and extensive applications of graph theory in
 computer science and mathematics, formal developments of graph theory
 have mostly been restricted to specific applications or definitions of
 graphs. In this work we present progress towards formalization of
-Wigderson's graph coloring algorithm through our own novel
-approach. We also provide a comprehensive review of various
-formalization approaches found in the literature, examining their
-motivations, theoretical design choices, and the robustness of their
-conclusions.
+Wigderson's graph coloring algorithm through our own novel approach in
+the Coq proof assistant. We also provide a comprehensive review of
+various formalization approaches found in the literature, examining
+their motivations, theoretical design choices, and the robustness of
+their conclusions.
 #+END_abstract
 
 #+BEGIN_comment
@@ -46,7 +46,7 @@ Notes for presentation later:
   • Constructivism and axioms
   • Representation of mathematical objects in type theory
 • Overview of graph theory formalizations in Coq
-  • math-comp (2008), formalization of four-color theorem
+  • math-comp (2008), formalization of four color theorem
   • CertiGraph (2019), verification of graph-manipulating programs
   • Doczkal and Pous (2019), formalization of Menger’s theorem and treewidths
   • my formalization, verification of graph coloring
@@ -77,7 +77,7 @@ establish the validity of a result.
 However, in recent years, there have been cases where some
 mathematical proofs were considered infeasible for a human to verify,
 thus bringing into question the validity of the result. For instance,
-in 1976, Appel and Haken announced a proof of the four-color problem
+in 1976, Appel and Haken announced a proof of the four-color theorem
 which was assisted in part by a computer program to perform the
 extensive case analysis for the reducible configurations. However, in
 the years that followed, several errors were uncovered which were
@@ -137,16 +137,16 @@ avenues for future research.
 
 * Overview of dependent type theory
 Type theory has a rich history, dating back to Principia Mathematica
-by Russell and Whitehead in the early 20^{th} century.\cite{whitehead}
-The aim of type theory is to provide a foundation for mathematics that
-avoids the paradoxes arising from naive set theory. In type theory,
-the objects of interest are not sets, but rather types and terms over
-those types.
+by Russell and Whitehead in the early 20^{th} century and the work of
+Hilbert.\cite{whitehead}\cite{hilbert} The aim of type theory is to
+provide a foundation for mathematics that avoids the paradoxes arising
+from naive set theory. In type theory, the objects of interest are not
+sets, but rather types and terms over those types.
 
 Simply Typed Lambda Calculus (STLC) is a type theory that was
-introduced by Church in the 1940s. It consists of rules of inference
-that declare how one may produce valid derivations. The objects of
-interest in STLC are terms and types over those terms. When a term $x$
+introduced by Church in the 1940s.\cite{church} It consists of rules
+of inference that declare how one may produce valid derivations. The
+objects of interest in STLC are terms and their types. When a term $x$
 has the type $\tau$, the notational convention is $x:\tau$, which is
 analogous to set membership.
 
@@ -159,8 +159,8 @@ according to the following grammar:
 \end{align*}
 
 Proof rules are a useful tool in STLC to establish the validity of
-type derivations. Here are the inference rules for the three rules in
-STLC, along with their names:
+type derivations. Here are the inference rules for STLC, along with
+their names:
 
 \begin{prooftree}
 \AxiomC{}
@@ -181,24 +181,23 @@ STLC, along with their names:
 \UnaryInfC{$\Gamma \vdash (\lambda x.e) : \sigma \to \tau$}
 \end{prooftree}
 
-The first inference rule is for the variable rule, which states that
-if $x$ has type $\tau$ in the context $\Gamma$, then $x$ has type
-$\tau$. The second inference rule is for the application rule, which
+The first inference rule is the variable rule, which states that if
+$x$ has type $\tau$ in the context $\Gamma$, then $x$ has type
+$\tau$. The second inference rule is the application rule, which
 states that if $e_1$ has type $\sigma \to \tau$ and $e_2$ has type
 $\sigma$ in the context $\Gamma$, then $e_1\ e_2$ has type $\tau$. By
 convention, application is left-associative and parentheses may be
-omitted. The third inference rule is for the lambda abstraction rule,
+omitted. The third inference rule is the lambda abstraction rule,
 which states that if $e$ has type $\tau$ in the context $\Gamma$
 extended with a variable $x$ of type $\sigma$, then $\lambda x.e$ has
 type $\sigma \to \tau$.
 
 Polymorphic \lambda-calculus extends STLC by introducing type-level
 quantifiers, allowing functions to be defined over types. One example
-of a polymorphic \lambda-calculus is System F, which adds the ability
-to define functions over types. The quantifiers in System F are
-type-level, allowing for more expressive type signatures. Here is an
-example of an inference rule for the type abstraction rule in System
-F:
+of a polymorphic \lambda-calculus is System F. The quantifiers in
+System F are type-level, allowing for more expressive type
+signatures. Here is an example of an inference rule for the type
+abstraction rule in System F:
 
 \begin{prooftree}
 \AxiomC{$\Gamma, \alpha \vdash e:\tau$}
@@ -206,18 +205,18 @@ F:
 \UnaryInfC{$\Gamma \vdash \Lambda \alpha.e:\forall \alpha.\tau$}
 \end{prooftree}
 
-This inference rule shows that if expression $e$ has type $\tau$ in
-the context $\Gamma$ extended with a type variable $\alpha$, then the
-type abstraction $\Lambda \alpha.e$ has the polymorphic type $\forall
-\alpha.\tau$.
+This inference rule shows that if the expression $e$ has type $\tau$
+in the context $\Gamma$ extended with a type variable $\alpha$, then
+the type abstraction $\Lambda \alpha.e$ has the polymorphic type
+$\forall \alpha.\tau$.
 
 Dependent type theory extends System F by allowing types to depend on
 terms, enabling greater expressiveness. The Calculus of Constructions
 is an example of dependent type theory that adds the ability to define
-functions over types, creating a type hierarchy. The Calculus of
-Inductive Constructions extends the Calculus of Constructions with
-inductive types, allowing for formalization of mathematical structures
-such as natural numbers, lists, and trees.
+functions over types. The Calculus of Inductive Constructions extends
+the Calculus of Constructions with inductive types, allowing for
+formalization of mathematical structures such as natural numbers,
+lists, and trees.
 
 In the Calculus of Constructions, a key feature is the use of
 universes, which are a hierarchy of types that can contain other
@@ -233,8 +232,8 @@ we can ensure that any given type is contained in a universe that is
 larger than itself, preventing paradoxes such as Girard's paradox
 (the type-theoretic analog of Russell's paradox.)\cite{girard_paradox}
 
-Here is an example of a proof rule for the dependent product formation
-rule in the Calculus of Constructions:
+Here is an example of an inference rule for dependent product
+formation in the Calculus of Constructions:
 
 \begin{prooftree}
 \AxiomC{$\Gamma \vdash A \typ \mathbb{U}_i$}
@@ -253,14 +252,14 @@ Inductive Constructions can be found in \cite{cumulative}.
 Dependent type theory provides a foundation for modern proof
 assistants such as Coq and Lean, which use the Calculus of Inductive
 Constructions as their underlying logic. These proof assistants are
-used to formalize mathematics, verify software, and prove the
-correctness of algorithms.
+used to formalize mathematics, and prove the correctness of
+algorithms.
 
 ** Computation in type theory
-The calculi presented so far resembles a Hilbert-style calculus, we
-have only considered proof trees that derive well-typed terms. What
-distinguishes type theory from other logical calculi is the
-computational behavior of the terms. Formally, there is a binary
+The calculus presented so far resembles a Hilbert-style calculus,
+since we have only considered proof trees that derive well-typed
+terms. What distinguishes type theories from other logical calculi is
+the computational behavior of the terms. Formally, there is a binary
 /evaluation relation/ (often denoted as $\to_\beta$) over the terms. In
 the \lambda-calculus, $\to_\beta$ is defined as follows:
 
@@ -268,10 +267,11 @@ the \lambda-calculus, $\to_\beta$ is defined as follows:
 (\lambda x.f) e &\to_\beta e[f/x]
 \end{align*}
 
-Here, $[f/x]$ denotes the substitution of $f$ for free occurrences of
-$x$ in $e$. The reflexive transitive closure of $\to_\beta$ is denoted as
-$\tred$. Various results exist regarding $\tred$, most notably strong
-normalization in typed \lambda-calculi, including for STLC:
+Here, $[f/x]$ denotes the capture-avoiding substitution of $f$ for
+free occurrences of $x$ in $e$. The reflexive transitive closure of
+$\to_\beta$ is denoted as $\tred$. Various results exist regarding
+$\tred$, most notably strong normalization in typed \lambda-calculi,
+including for STLC:
 
 \begin{thm*}[Strong Normalization]
 For all expressions $e$ of the Simply Typed Lambda Calculus, all reduction sequences beginning with $e$ are finite.
@@ -297,18 +297,17 @@ instance, these rules can be used to model the operational semantics
 of programming languages and enable the extraction of executable code
 from formal proofs. Moreover, the properties of these computation
 rules, such as strong normalization, can provide insights into the
-decidability and termination of programs and algorithms.
+decidability and termination of programs.
 
 ** Curry-Howard correspondence
 The Curry-Howard correspondence provides a correspondence between
-proof calculi and computational type systems.\cite{wadler} In
-propositional logic, a formula consists of either a propositional
-variable $X_n$ or a compound formula $A \land B$, $A \lor B$, $A
-\implies B$, $\lnot A$, where $A$ and $B$ are formulas. The
-Curry-Howard correspondence provides a way to map propositional
-formulas to types and lambda terms in a computational type system. The
-table below summarizes the correspondence between logic, types, and
-sets.
+proof calculi and type systems.\cite{wadler} In propositional logic, a
+formula consists of either a propositional variable $X_n$ or a
+compound formula $A \land B$, $A \lor B$, $A \implies B$, $\lnot A$,
+where $A$ and $B$ are formulas. The Curry-Howard correspondence
+provides a way to map propositional formulas to types and proofs to
+terms. The table below summarizes the correspondence between logic,
+types, and sets.
 
 | *Logic*                | *Types*              | *Sets*                          |
 |----------------------+--------------------+-------------------------------|
@@ -331,8 +330,7 @@ other words, each valid proof in propositional logic corresponds to a
 valid lambda term in STLC, and vice versa.
 
 The Curry-Howard correspondence also occurs at the level of proofs and
-programs. Further details can be read in \cite{ttfp} and
-\cite{wadler}.
+terms. Further details can be read in \cite{ttfp} and \cite{wadler}.
 
 | *Logic*                    | *Types*                  |
 |--------------------------+------------------------|
@@ -357,8 +355,10 @@ In System F, polymorphic types can be defined using universal
 quantification. For example, the identity function can be defined with
 type $\forall \alpha. \alpha \to \alpha$, where $\alpha$ is a type
 variable ranging over all possible types. This type captures the
-essence of the identity function, which takes an input of any type and
-returns the same value.
+essence of the polymorphic identity function, which takes an input of
+any type and returns the same value. Note that in STLC any
+\lambda-binding can only have one type associated with it, instead of
+being a type variable.
 
 In the Calculus of Constructions, new types can be defined using
 dependent products, dependent sums, and inductive types. A dependent
@@ -409,16 +409,17 @@ $0$ and $succ$. Formally,
 This definition introduces a new inductive type $\mathbb{N}$ with two
 constructors 0 and /succ/, and is a type that belongs to the universe.
 In terms of metatheory, when we construct an inductive type, we are
-taking the fixpoint of a monotonic operation on types $\Theta :
+taking the least fixpoint of a monotonic operation on types $\Theta :
 \mathbb{U}\to\mathbb{U}$. Relevant details may be found in Section
 7.10 of \cite{ttfp}.
 
 ** Equality in dependent type theory
 Although the dependent type theory presented so far seems
 inexpressive, we can begin to introduce predicates of interest. We
-only show a simple example but for full details refer to \cite{ttfp}.
+only show a simple example but for full details refer to
+\cite{ttfp}.
 
-We would like to define propositional equality, to make the logical
+We would like to define propositional equality to make the logical
 assertion regarding two terms $a$ and $b$ as:
 
 \begin{center}
@@ -463,14 +464,14 @@ type theory.
 
 
 ** Interactions between axioms in dependent type theory
-Under the Curry-Howard correspondence, disjunction corresponds to sum
-types. We are also able to define the empty type $\bot$ corresponding
-to the always false statement. Thus we can consider the type $\forall
-(P : \mathbb{U}),\, P\vee\neg P$. If this type were inhabited, it would
-imply a way of selecting an element from every nonempty
-type.\cite{hott} For a particular $P$, it is possible to write a term
-that yields a proof of $P$ or its negation, but this is not assumed to
-be given in general.
+Under the Curry-Howard correspondence, disjunction corresponds to the
+sum type. We are also able to define the empty type $\bot$
+corresponding to the always false statement. Thus we can consider the
+type $\forall (P : \mathbb{U}),\, P\vee\neg P$. If this type were
+inhabited, it would imply a way of selecting an element from every
+nonempty type.\cite{hott} For a particular $P$, may be possible to
+write a term that yields a proof of $P$ or its negation, but this is
+not assumed to be given in general.
 
 In dependent type theory, we must take care when adding extra
 assumptions, since they may interact in subtle ways that allow for LEM
@@ -526,7 +527,7 @@ Proof.
 Qed.
 
 (* LEM follows from prop_ext and dec_eq *)
-Lemma prop_ext_deceq_lem : prop_ext -> dec_eq -> lem.
+Lemma prop_ext_dec_eq_lem : prop_ext -> dec_eq -> lem.
 Proof.
   unfold dec_eq, lem.
   intros prop_ext dec_eq P.
@@ -536,20 +537,19 @@ Qed.
 
 * Overview of Coq
 Coq\cite{coqart} is a proof assistant for writing mathematical
-statements, constructing their proofs and mechanically checking the
-validity of their proofs. The logical foundation of Coq is the
-Calculus of Inductive Constructions. There are many resources and
-guides on various aspects of Coq applied in different contexts, such
-as program verification or mechanization of
-mathematics.\cite{cpdt}\cite{sergey}\cite{sf}
+statements, constructing their proofs and mechanically checking their
+validity. The logical foundation of Coq is the Calculus of Inductive
+Constructions. There are many resources and guides on various aspects
+of Coq applied in different contexts, such as program verification or
+mechanization of mathematics.\cite{cpdt}\cite{sergey}\cite{sf}
 
 Coq consists of two languages, /Gallina/ and /Ltac/. Gallina is the
 specification language of Coq and can be thought of as the underlying
 term language. Gallina is purely functional and has support for
-dependent types and dependent pattern matching. /Ltac/ is the tactic
+dependent types and dependent pattern matching. Ltac is the tactic
 language of Coq and is what is used to carry out formal proofs. An
-introduction to Ltac and Coq can be found in \cite{tactic} and
-\cite{hurry} respectively. It suffices to say that, from a usability
+introduction to Ltac and the Coq system can be found in \cite{tactic}
+and \cite{hurry}. It suffices to say that, from a usability
 standpoint, \textit{Ltac} commands operate on the current
 \textit{proof state}, which is the context consisting of hypotheses
 and a goal. The commands may introduce new hypotheses, clear existing
@@ -583,7 +583,7 @@ Inductive list (A : Type) : Type :=
 | cons : A -> list A -> list A.
 #+END_SRC
 
-This definition introduces a new list type parameterized over a type
+This definition introduces a new type ~list~ parameterized over a type
 ~A~, with two constructors ~nil~ and ~cons~. The constructor ~cons~ takes an
 element of type ~A~ and a list of type ~list A~, and returns a new list
 with the element added to the front.
@@ -672,8 +672,7 @@ proof of reflexivity for equality. ~eq_ind_r~ allows us to rewrite a
 proof term using an equality. As outlined in Section [[Curry-Howard
 correspondence]], the under the Curry-Howard correspondence,
 well-typed terms correspond to proofs. From a usability perspective,
-the user is more concerned about the state of their proof and what
-tactic to perform next, as they construct the underlying term.
+the user focuses on the proof state rather than the proof term.
 
 ** Proof engineering
 In the last few decades, the practice of /proof engineering/ has emerged
@@ -697,7 +696,7 @@ libraries.
 /Automation/: Developing custom tactics and decision procedures can
 greatly reduce the manual effort required to carry out
 proofs. Automation can also help to manage complexity and improve the
-overall efficiency of the proof process.
+overall efficiency of the proof process.\cite{coqhammer}
 
 /Documentation/: Providing clear documentation for formal developments
 is crucial to ensure that the intended meaning of definitions,
@@ -712,14 +711,13 @@ specific results, or even changing the underlying definitions to make
 them more amenable to formal reasoning.
 
 * Building graph theory in Coq
-In this section, we will present how we carried out our own
-development of graph theory in Coq. Section [[Survey of graph theory
-developments in Coq]] will provide comparison as to how the design
-choices here fit in the formalization landscape. The full repository
-containing the definitions and proofs can be found in
-\cite{wigderson-siraben}. We also provide a printout of the source for
-the theory of subgraphs in Section [[Appendix A: A formal theory of
-subgraphs]].
+In this section, we will present our own development of graph theory
+in Coq. Section [[Survey of formal developments of graph theory in Coq]]
+will provide comparison as to how the design choices here fit in the
+formalization landscape. The full repository containing the
+definitions and proofs can be found in \cite{wigderson-siraben}. We
+also provide a printout of the source for the theory of subgraphs in
+Section [[Appendix A: A formal theory of subgraphs]].
 
 
 ** Preliminary definitions
@@ -772,27 +770,26 @@ appropriate lemmas and structures.
 Our main contribution is progress towards the formalization of key
 lemmas for the proof of correctness of Wigderson's
 algorithm. Wigderson's algorithm\cite{wigderson} is an approximate
-graph coloring algorithm that aims to color a 3-colorable graph
-with at most $3\sqrt{n}$ colors in polynomial time. If the graph is
-not 3-colorable, then either a valid approximation is returned or the
-a certification that the input was not 3-colorable.
+graph coloring algorithm that aims to color a 3-colorable graph with
+at most $3\sqrt{n}$ colors in polynomial time. If the graph is not
+3-colorable, then either a valid approximation is returned or the
+certification that the input was not 3-colorable.
 
 Our development will closely follow the paper by
 Wigderson\cite{wigderson} in which he presents a proof of correctness
-with the given color bound and its polynomial running time, with
-appropriate lemmas. First we present an imperative version of the
-algorithm then its purely functional equivalent. Then we explore in
-detail key lemmas and theories that must be built up for us to reason
-about correctness of the algorithm.
+with the given color bound and its polynomial running time. First we
+present an imperative version of the algorithm then its purely
+functional equivalent. Then we explore key lemmas and theories that
+must be built up for us to reason about correctness of the algorithm.
 
-The idea of Wigderson's algorithm is to find vertices with degree of
-least \(k\). Finding these high-degree vertices allows us to color
-more vertices at once since we are able to 2-color the neighborhood
-for each of these vertices. Then we remove the colored vertices and
-continue this until no such high-degree vertices remain. Then color
-the remaining vertices with new colors. Then the pseudocode algorithm
-he is as follows where $\Delta(G)$ is the maximum degree of any vertex
-in $G$:
+The idea of Wigderson's algorithm is to find vertices in $G$ with
+degree of least \(k\). Finding these high-degree vertices allows us to
+color more vertices at once since we are able to 2-color the
+neighborhood for each of these vertices. Then we remove the colored
+vertices and continue this until no such high-degree vertices
+remain. Then color the remaining vertices with new colors. The
+pseudocode is as follows, where $\Delta(G)$ is the maximum degree of
+any vertex in $G$:
 
 #+CAPTION: Wigderson's 3-coloring algorithm.
 #+BEGIN_algorithm
@@ -819,19 +816,19 @@ by recursively forcing colors. We do this for vertices with higher
 degrees to eliminate as many colors as possible. Finally, we color the
 remaining vertices in a straightforward manner.
 
-In the while loop, $i$ is incremented by $2$ and $3$ colors are
-used. This means there will be overlap between the final color used on
-the current iteration and the first color used on the next
-iteration. This is possible since the final color assigned on each
-iteration is to $v$. Since the neighborhood of $v$, $N_G(v)$ was
-already colored, reusing this color for other vertices will not cause
-any contradictions. To make verification easier, we fix the color of
+In the while loop, $i$ is incremented by 2 and 3 colors are used. This
+means there will be overlap between the final color used on the
+current iteration and the first color used on the next iteration. This
+is possible since the final color assigned on each iteration is to
+$v$. Since the neighborhood of $v$, $N_G(v)$ was already colored,
+reusing this color for other vertices will not cause any
+contradictions. To make verification easier, we fix the color of
 high-degree to color 1 on every iteration and use two unique colors
 for the neighborhoods.
 
 ** Finding a bound on the number of colors used
 Let $n$ be the number of vertices in the graph. In a dense graph, it
-is possible that all vertices have at least degree \(k\). However,
+is possible that all vertices have degree at least \(k\). However,
 each iteration removes at least $k + 1$ vertices from the graph. We
 can remove at most $n$ vertices, so $(k+1)x \leq n$ where $x$ is the
 number of iterations, and thus $x \leq \frac{n}{k+1}$. Once the loop
@@ -852,20 +849,19 @@ This leads to a bound of $\sqrt{2n} + \frac{2n}{\sqrt{2n}} =
 2\sqrt{2n} = \sqrt{8}\sqrt{n} \approx 2.828\sqrt{n} =
 O(\sqrt{n})$. For sake of simplicity, we will use $k = \sqrt{n}$ as
 Wigderson did. This will give us a bound of $\sqrt{n} +
-\frac{2n}{\sqrt{n}} = 3\sqrt{n} = O(\sqrt{n})$. This proves the bound.
+\frac{2n}{\sqrt{n}} = 3\sqrt{n} = O(\sqrt{n})$.
 
 ** Translation to a functional algorithm
-We aim to further detail the algorithm steps to convert this into a
-functional program for use in Coq. We use the updated color assignment
-process we described and use the value $k = \sqrt{n}$. The algorithm
-can be described in two phases: the first where we color the
-high-degree vertices and their neighborhoods, and the second is
-coloring the remaining vertices. We present the pseudocode for both
-Phase I and Phase II of the algorithm, with each phase divided into
-further subroutines.
+For verification, we must rewrite the algorithm in a functional style.
+We use the updated color assignment process we described and use the
+value $k = \sqrt{n}$. The algorithm can be described in two phases:
+the first where we color the high-degree vertices and their
+neighborhoods, and the second is coloring the remaining vertices. We
+present the pseudocode for both Phase I and Phase II of the algorithm,
+with each phase divided into further subroutines.
 
 \begin{algorithm}
-\caption{Phase I Algorithm}
+\caption{Phase I of Wigderson's algorithm}
 \hspace*{\algorithmicindent}\textbf{Input:} A graph $G(V, E)$ with $|V| = n$
 \begin{algorithmic}[1]
 \Function{two-color-vertex}{$v, c_1, c_2$}
@@ -909,7 +905,7 @@ with a graph with no high degree vertex in which we will then use for
 Phase II.
 
 \begin{algorithm}
-\caption{Phase II Algorithm}
+\caption{Phase II of Wigderson's algorithm}
 \hspace*{\algorithmicindent}\textbf{Input:} A graph $G(V, E)$ with maximum degree $d$
 \begin{algorithmic}[1]
 \Function{color-d}{$G, d, c, f$}
@@ -972,9 +968,9 @@ color in the final step, we obtain $3\sqrt{n}$).
 ** Constructing the formalization
 Now that we have established context, we continue with the
 formalization, as shown in Listing [[fig:coloring_formal]]. A ~coloring~ is
-defined to be a finite map from vertices to colors. ~coloring_ok~ states
-that for a given palette of colors, graph, and coloring, the coloring
-is considered to be OK if for every edge ~i~ to ~j~, if ~i~ is assigned some
+a finite map from vertices to colors. ~coloring_ok~ states that for a
+given palette of colors, graph, and coloring, the coloring is
+considered to be OK if for every edge ~i~ to ~j~, if ~i~ is assigned some
 color, the color must be in the palette, and the colors of ~j~ and ~i~ (if
 they are both colored) are not the same. Note that this allows our
 colorings to be partial. ~coloring_complete~ states that for a given
@@ -983,13 +979,15 @@ is assigned some color and the entire graph is OK with respect to the
 coloring. Finally, ~n_coloring~ states that a given coloring is an
 ~n~-coloring if the cardinality of the set of colors used is ~n~ and all
 vertices that are colored are assigned some color in the palette
-(again allowing for partial colorings). The reason why we want to
-split the definitions up in this way is that we may need different
-conditions at different stages of developments. When we are coloring a
-graph, the coloring constructed so far is not a complete coloring;
-thus we must allow ourselves to talk about partial colorings that are
-consistent thus far. Of course, the definition of ~n_coloring~ makes it
-easy to define what a 3-coloring is, and we define ~three_coloring~ for
+(again allowing for partial colorings). We want to split the
+definitions up in this way so that we can impose flexible constraints
+on the coloring we are interested in. For instance, we may want a
+coloring to be partial at one point in the proof but complete on a
+particular subgraph. Furthermore, when we are coloring a graph, the coloring
+constructed so far is not a complete coloring; thus we must allow
+ourselves to talk about partial colorings that are consistent thus
+far. Of course, the definition of ~n_coloring~ makes it easy to define
+what a 3-coloring is, and we define ~three_coloring~ for
 convenience. The full development may be found in the ~coloring.v~ file
 in \cite{wigderson-siraben}.
 
@@ -997,20 +995,20 @@ A key component of Wigderson's algorithm is coloring the neighborhood
 of vertices of a given degree. This means that we must be able to
 reason about the degree of an arbitrary vertex, its neighborhood, how
 we construct the coloring, and so on. We start by building a theory of
-subgraphs. The theory of subgraphs ends up being the bulk of our
-development, and we provide a full listing of all the lemmas
-formalized in Section [[Appendix A: A formal theory of
-subgraphs]]. Listing [[fig:subgraph_formal]] shows the key formalization
-of subgraphs used in our development. ~g'~ is a subgraph of ~g~ if the
-vertex set of ~g'~ is a subset of the vertex set of ~g~ and if the
-adjacency set of any ~v~ in ~g'~ is a subset of the adjacency set of ~v~ in
-~g~. The ~neighbors~ of ~v~ in ~g~ is simply its adjacency set. To remove a
-vertex ~v~ from a graph ~g~, we remove the vertex and its adjacency set
-from the graph, then go through all the adjacency sets of all the
-vertices and remove ~v~ from them. To induce a subgraph of ~g~ from a
-vertex set ~s~, we start with an empty graph. For each vertex ~v~ and its
-adjacency set ~adj~, we check if ~v~ is a member of ~s~; if so, we add it
-and the intersection of its adjacency set in ~g~ to the new graph.
+subgraphs, which ends up being the bulk of our development, and we
+provide a full listing of all the lemmas formalized in Section
+[[Appendix A: A formal theory of subgraphs]]. Listing [[fig:subgraph_formal]]
+shows the key formalization of subgraphs used in our development. ~g'~
+is a subgraph of ~g~ if the vertex set of ~g'~ is a subset of the vertex
+set of ~g~ and if the adjacency set of any ~v~ in ~g'~ is a subset of the
+adjacency set of ~v~ in ~g~. The ~neighbors~ of ~v~ in ~g~ is simply its
+adjacency set. To remove a vertex ~v~ from a graph ~g~, we remove the
+vertex and its adjacency set from the graph, then go through all the
+adjacency sets of all the vertices and remove ~v~ from them. To induce a
+subgraph of ~g~ from a vertex set ~s~, we start with an empty graph. For
+each vertex ~v~ and its adjacency set ~adj~, we check if ~v~ is a member of
+~s~; if so, we add it and the intersection of ~adj~ and ~s~ to the new
+graph.
 
 Finally, the ~neighborhood~ of ~v~ in ~g~ is the result of inducing a
 subgraph of ~g~ from its neighbors and then removing ~v~ from the
@@ -1023,7 +1021,7 @@ Definition colors := S.t.
 Definition coloring := M.t node.
 
 Definition coloring_ok (palette: colors) (g: graph) (f: coloring) :=
- forall i j, S.In j (adj g i) ->
+  forall i j, S.In j (adj g i) ->
      (forall ci, M.find i f = Some ci -> S.In ci palette) /\
      (forall ci cj, M.find i f = Some ci -> M.find j f = Some cj -> ci<>cj).
 
@@ -1060,8 +1058,8 @@ Definition neighborhood (g : graph) v :=
 ** Phase I Lemmas
 First, we want to establish that the neighborhood of a vertex in a
 3-colorable graph is 2-colorable. Although this may seem simple, due
-to the definition of a mapping, this is quite challenging. We first
-show that a 3-colorable neighborhood and vertex ~v~ will induce a
+to the definition of a mapping, this is quite challenging. Consider
+the fact that a 3-colorable neighborhood and vertex ~v~ will induce a
 3-coloring that only uses 2 colors. We need to show that this coloring
 can be transformed into a 2-coloring. Even though the coloring does
 not change, the information at the type level changes; we go from
@@ -1091,9 +1089,9 @@ complete on the neighborhood.
 #+BEGIN_SRC coq
 Lemma nbd_Sn_colorable_n :
   forall (g : graph) (f : coloring) (p : colors) (n : nat),
-   coloring_complete p g f ->
-   n_coloring f p (S n) ->
-   forall v ci, M.find v f = Some ci ->
+    coloring_complete p g f ->
+    n_coloring f p (S n) ->
+    forall v ci, M.find v f = Some ci ->
            n_coloring (restrict_on_nbd f g v) (S.remove ci p) n
         /\ coloring_complete (S.remove ci p)
                              (neighborhood g v)
@@ -1140,7 +1138,22 @@ neighborhoods together. We can combine them individually to reform the
 entire graph. In particular, we want to use this fact to show that the
 partial colorings of neighborhoods will form a valid coloring when
 combined together. We can show this works for any two disjoint partial
-colorings and apply induction for the whole process.
+colorings and apply induction for the whole process. Here is the
+formal statement of this lemma.
+
+#+BEGIN_SRC coq
+Lemma coloring_union (c d : coloring) p1 p2 g :
+  undirected g ->
+  S.Empty (S.inter p1 p2) ->
+  coloring_ok p1 g c ->
+  coloring_ok p2 g d ->
+  coloring_ok (S.union p1 p2) g (Munion c d).
+#+END_SRC
+
+The statement is that if two colorings ~c~ and ~d~ use disjoint sets of
+colors ~p1~ and ~p2~ respectively, and are valid colorings on the graph ~g~,
+then the union of the two colorings is a valid coloring on ~g~, using
+the union of the two sets of colors.
 
 ** Phase II Lemmas
 In Phase II, we color a graph with maximum degree $d$ with $d+1$
@@ -1163,10 +1176,6 @@ Lemma remove_max_deg_adj : forall (g : graph) (i j : node) (d : nat),
     degree (remove_node i g) j = d ->
     ~ (S.In j (adj g i)).
 #+END_SRC
-
-We then show that this holds even after repeated removals.
-
-# continue proofreading from here
 
 * Implementing Wigderson's algorithm
 We have described the phases of the algorithm in pseudocode, but we
@@ -1209,16 +1218,22 @@ Lemma two_color_nbd_complete : forall (g : graph) (v : node) c1 c2 c3,
                       (two_color_nbd g v c1 c2).
 #+END_SRC
 
+Formally, it states that if the graph ~g~ is undirected, has no
+self-loops, and contains a vertex ~v~, and if there exists a
+coloring ~m~ on ~g~ such that the vertex ~v~ is assigned a color
+~c3~ that is distinct from ~c1~ and ~c2~, then there exists a
+2-coloring on the neighborhood of ~v~ that is complete.
+
 ** Phase II
 We fully define the second phase of the algorithm. First we write a
 function to iteratively extract a vertex of a given degree and remove
-it from a graph. Separately, we also prove that if the degree d that
-was given is the max degree, then ~extract_vertices_deg~ exhausts all
-the vertices of max degree, and the graph returned has a maximum
-degree of one less. Here, we have to provide a proof of termination
-using the ~measure~ keyword in Coq, since Coq does not allow
-non-terminating functions. We use the fact that the size of the graph
-is decreasing at each step.
+it from the graph. Separately, we also prove that if the degree d that
+was given is the maximum degree, then ~extract_vertices_deg~ exhausts
+all the vertices of maximum degree, and the graph returned has a
+maximum degree of one less. Here, we have to provide a proof of
+termination using the ~measure~ keyword in Coq, since Coq does not allow
+non-terminating functions. To show termination, we use the fact that
+the size of the graph is decreasing at each step.
 
 #+BEGIN_SRC coq
 Function extract_vertices_deg (g : graph) (d : nat) {measure M.cardinal g}
@@ -1258,19 +1273,19 @@ table.
 
 \newpage
 
-* Survey of graph theory developments in Coq
-In this section, we provide a comprehensive survey of the formal
-theory of graphs in Coq, along with other work, examining their
-motivations, theoretical design choices, and the robustness of their
-conclusions.
+* Survey of formal developments of graph theory in Coq
+In this section, we provide a comprehensive survey of formal
+developments of graph theory in Coq, along with other work, examining
+their motivations, theoretical design choices, and the robustness of
+their conclusions.
 
 ** Mathematical Components
 The Mathematical Components library\cite{mathcomp} in Coq is a library
 of formalized mathematics in Coq. The theory spans data structures
 such as numbers, lists, and finite sets to results in algebra,
 topology, and analysis. In addition, the library serves as the
-underlying infrastructure for machine-checked proofs of the Four Color
-Theorem and Odd Order Theorem. In contrast to many developments in
+underlying infrastructure for machine-checked proofs of the four-color
+theorem and the odd order theorem. In contrast to many developments in
 Coq, and indeed many libraries built into Coq itself, the Mathematical
 Components library heavily employs the proof by reflection technique
 to improve efficiency and automation in formal proofs.
@@ -1287,17 +1302,14 @@ predicate, Coq can verify the correctness of the predicate by running
 a computation that produces a certificate (i.e., evidence) of the
 proof.
 
-In the context of the Four Color Theorem\cite{gonthier}, proof by
+In the context of the four-color theorem\cite{gonthier}, proof by
 reflection is employed in various parts of the proof, such as checking
 the colorability of hypermaps, testing the validity of contract
 sequences, and verifying properties of special maps. A contract
 coloring and contract sequence are both concepts used when dealing
-with reducible configurations for the main proof. The Four Color
-Theorem states that any map on a plane or a sphere can be colored with
-at most four colors such that no two adjacent regions have the same
-color. In the proof of the theorem, hypermaps are used to represent
-the structure of maps, and contracts are a way of simplifying the
-hypermaps.
+with reducible configurations for the main proof. In the proof of the
+theorem, hypermaps are used to represent the structure of maps, and
+contracts are a way of simplifying the hypermaps.
 
 ** Doczkal and Pous
 Doczkal and Pous present a comprehensive library for graph theory in
