@@ -1,7 +1,6 @@
 (require 'ox-latex)
 
 (setq org-latex-listings 'minted)
-(setq org-latex-listings 'minted)
 (setq org-latex-packages-alist '(("" "minted")))
 
 (add-to-list 'org-latex-classes
