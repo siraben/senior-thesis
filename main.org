@@ -37,23 +37,11 @@ Notes for presentation later:
   from logic, type theory, graph theory and computer science
 #+END_comment
 
-#+BEGIN_comment
-• Introduction
-  • Historical context for logics, formalization of mathematics
-• Overview of dependent type theory
-  • Comparisons with set theory and first-order theories
-  • Curry-Howard correspondence
-  • Constructivism and axioms
-  • Representation of mathematical objects in type theory
-• Overview of graph theory formalizations in Coq
-  • math-comp (2008), formalization of four color theorem
-  • CertiGraph (2019), verification of graph-manipulating programs
-  • Doczkal and Pous (2019), formalization of Menger’s theorem and treewidths
-  • my formalization, verification of graph coloring
-• Conclusion
-  • Relation to developments in other proof assistants (Lean, Isabelle/HOL)
-• Future work
-#+END_comment
+\section*{Acknowledgements}
+I would like to thank my advisor and mentor, Dr. Steven Tschantz, for
+his invaluable guidance and support over the last two years. The work
+leading up to the thesis and the thesis itself would not have been
+possible without our countless extended discussions.
 
 #+BEGIN_comment
 Writing notes:
