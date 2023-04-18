@@ -10,8 +10,6 @@
 \usetikzlibrary{shapes,arrows}
 \usetikzlibrary{positioning}
 \usepackage{bussproofs}
-\usepackage[backend=biber]{biblatex}
-\addbibresource{citations.bib}
 
 \title{Formalizing Graph Theory in Type Theory}
 \subtitle{with progress towards a formalization of Wigderson's algorithm}
@@ -190,7 +188,15 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Example of $\beta$-reduction}
+\frametitle{Examples of $\beta$-reduction}
+\begin{align*}
+(\lambda x. x) 5 &\to 5
+\end{align*}
+
+\begin{align*}
+(\lambda x. x) (\lambda x. x) &\to (\lambda x. x)
+\end{align*}
+
 % (\x.y)((\z.zz)(\w.w)) -> (\x.y)((\w.w)(\w.w)) -> (\x.y)(\w.w) -> y
 \begin{align*}
 (\lambda x. y)((\lambda z. z\,z)(\lambda w. w)) &\to (\lambda x. y)((\lambda w. w)(\lambda w. w)) \\
@@ -255,16 +261,16 @@ that relates the derivation of any judgement
 \end{prooftree}
 \vspace{1cm}
 \begin{prooftree}
-\AxiomC{$p:A \times B$}
+\AxiomC{$p :\,$\textcolor{red}{$A \times B$}}
 \RightLabel{$\times$E$_2$}
-\UnaryInfC{$\pi_2\,p:B$}
-\AxiomC{$p:A \times B$}
+\UnaryInfC{$\pi_2\,p:\,$\textcolor{red}{$B$}}
+\AxiomC{$p:\,$\textcolor{red}{$A \times B$}}
 \RightLabel{$\times$E$_1$}
-\UnaryInfC{$\pi_1\,p:A$}
+\UnaryInfC{$\pi_1\,p:\,$\textcolor{red}{$A$}}
 \RightLabel{$\times$I}
-\BinaryInfC{$(\pi_2\,p, \pi_1\,p):B \times A$}
+\BinaryInfC{$(\pi_2\,p, \pi_1\,p) :\,$\textcolor{red}{$B \times A$}}
 \RightLabel{$\rightarrow$I}
-\UnaryInfC{$\lambda (p:A \times B). (\pi_2\,p, \pi_1\,p):A \times B \rightarrow B \times A$}
+\UnaryInfC{$\lambda (p:A \times B). (\pi_2\,p, \pi_1\,p):\,$\textcolor{red}{$A \times B \rightarrow B \times A$}}
 \end{prooftree}
 
 \end{frame}
@@ -391,9 +397,9 @@ that relates the derivation of any judgement
 \end{itemize}
 \end{frame}
 
-\subsubsection{Informal Proof of Correctness}
+\subsubsection{Informal proof of correctness}
 \begin{frame}
-\frametitle{Informal Proof of Correctness}
+\frametitle{Informal proof of correctness}
 \begin{itemize}
     \item Neighborhood of any vertex in a 3-colorable graph is 2-colorable
     \item Find 2-coloring in linear time by recursively forcing colors
@@ -430,8 +436,6 @@ that relates the derivation of any judgement
 \end{itemize}
 \end{frame}
 
-
-
 \section{Our approach}
 \begin{frame}
 \frametitle{Our approach}
@@ -463,11 +467,34 @@ that relates the derivation of any judgement
 \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Definitions in Coq}
+\begin{itemize}
+\item This interface lets us work directly in the Calculus of
+  Inductive Constructions with rigorous checking of all proofs.
+\item Allows large formal proofs to be written, maintained, refactored
+  (\textit{proof engineering})
+\item Example of definitions in Coq:
+\end{itemize}
+\begin{minted}[]{coq}
+Inductive nat : Type :=
+| O : nat
+| S : nat -> nat.
+Fixpoint add (n m : nat) : nat :=
+  match n with
+  | O => m
+  | S p => S (add p m)
+  end.
+Lemma add_comm : forall n m : nat, add n m = add m n.
+\end{minted}
+
+\end{frame}
+
 \begin{frame}
 \frametitle{Building Graph Theory in Coq}
 \begin{itemize}
 \item We develop graph theory in Coq from scratch
-\item Based on the definition of graphs in \cite{sf}
+\item Based on the definition of graphs in Pierce et al.
 \item Vertices represented as positive integers
 \item Adjacency set representation (a graph is a map from vertices to
   their adjacency set)
@@ -475,9 +502,9 @@ that relates the derivation of any judgement
 \end{itemize}
 \end{frame}
 
-\subsection{Preliminary Definitions in Coq}
+\subsection{Preliminary definitions in Coq: Graphs}
 \begin{frame}[fragile]
-\frametitle{Preliminary Definitions in Coq}
+\frametitle{Preliminary definitions in Coq: Graphs}
 \begin{minted}[fontsize=\footnotesize]{coq}
 Module E := PositiveOrderedTypeBits.
 Module S <: FSetInterface.S := PositiveSet.
@@ -500,14 +527,173 @@ Definition nodes (g: graph) := Mdomain g.
 \end{minted}
 \end{frame}
 
+\subsection{Preliminary definitions in Coq: Coloring}
+\begin{frame}[fragile]
+\frametitle{Preliminary definitions in Coq: Coloring}
+\begin{minted}[fontsize=\footnotesize]{coq}
+Definition colors := S.t.
+Definition coloring := M.t node.
+
+Definition coloring_ok (palette: colors) (g: graph) (f: coloring) :=
+  forall i j, S.In j (adj g i) ->
+     (forall ci, M.find i f = Some ci -> S.In ci palette) /\
+     (forall ci cj, M.find i f = Some ci ->
+                    M.find j f = Some cj ->
+                    ci <> cj).
+
+Definition coloring_complete (palette: colors) (g: graph) (f: coloring) :=
+  (forall i, M.In i g -> M.In i f) /\ coloring_ok palette g f.
+
+Definition n_coloring (f : coloring) (p : colors) (n : nat) :=
+  S.cardinal p = n /\ forall v c, M.find v f = Some c -> S.In c p.
+
+Definition three_coloring (f : coloring) p := n_coloring f p 3.
+\end{minted}
+\end{frame}
+
+\subsection{Key lemma for Phase I}
+\begin{frame}
+\frametitle{A key lemma for Phase I}
+\begin{itemize}
+\item Prove neighborhood of vertex in 3-colorable graph is 2-colorable
+\item Follows from more general statement: neighborhood of vertex in
+  $n$-colorable graph is $(n-1)$-colorable
+\end{itemize}
+\begin{proof}
+Let $G$ be a $n$-colorable graph and let $v$ be an arbitrary vertex in $G$. Then there exists a coloring of $G$ using at most $n$ different colors. Vertex $v$ must be assigned some color $c$. Then all vertices adjacent to $v$ i.e. the neighborhood of $v$ will have colors different than $c$. Since the graph is $n$-colorable, one of these being $c$, the neighborhood can only use at most $n-1$ colors.
+\end{proof}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Formal elaboration of a Phase I Lemma}
+For any graph \texttt{g}, coloring \texttt{f}, set of colors
+\texttt{p}, and natural number \texttt{n}, if the coloring \texttt{d}
+is complete on \texttt{g} using colors \texttt{p}, and \texttt{f} is a
+coloring that uses \(n + 1\) colors, then for any vertex \texttt{v}
+with color \texttt{ci}, if we restrict \texttt{f} to the neighborhood
+on \texttt{v} and the result is an \texttt{n}-coloring using the
+colors \(\texttt{p}\setminus\{\texttt{ci}\}\), then this restricted
+coloring is complete on the neighborhood.
+\begin{minted}[fontsize=\footnotesize]{coq}
+Lemma nbd_Sn_colorable_n :
+  forall (g : graph) (f : coloring) (p : colors) (n : nat),
+    coloring_complete p g f ->
+    n_coloring f p (S n) ->
+    forall v ci, M.find v f = Some ci ->
+           n_coloring (restrict_on_nbd f g v) (S.remove ci p) n
+        /\ coloring_complete (S.remove ci p)
+                             (neighborhood g v)
+                             (restrict_on_nbd f g v).
+\end{minted}
+\end{frame}
+
+\subsection{Key lemma for Phase II}
+\begin{frame}[fragile]
+\frametitle{A key lemma for Phase II}
+\begin{itemize}
+\item In Phase II, we color a graph with maximum degree $d$ using
+  $d+1$ colors.
+\item Repeatedly select and remove vertices of highest degree in the
+  graph, coloring them the same color
+\item Continue until no more uncolored vertices
+\item Want to show that selecting highest degree vertices repeatedly
+  never results in adjacent vertices:
+\end{itemize}
+\begin{minted}[fontsize=\footnotesize]{coq}
+Lemma remove_max_deg_adj : forall (g : graph) (i j : node) (d : nat),
+  d > 0 ->
+  undirected g ->
+  no_selfloop g ->
+  max_deg g = d ->
+  M.In i g ->
+  M.In j g ->
+  degree g j = d ->
+  degree (remove_node i g) j = d ->
+  ~ (S.In j (adj g i)).
+\end{minted}
+\end{frame}
+
+\begin{frame}
+\frametitle{Statistics of our graph theory development}
+\begin{table}[htbp]
+\centering
+\begin{tabular}{lrrr}
+\textbf{Filename} & \textbf{Blank lines} & \textbf{Comment lines} & \textbf{Code lines}\\[0pt]
+\hline
+\texttt{subgraph.v} & 138 & 131 & 1145\\[0pt]
+\texttt{coloring.v} & 80 & 146 & 994\\[0pt]
+\texttt{graph.v} & 122 & 173 & 407\\[0pt]
+\texttt{wigderson.v} & 47 & 119 & 228\\[0pt]
+\texttt{restrict.v} & 14 & 6 & 181\\[0pt]
+\texttt{munion.v} & 6 & 6 & 63\\[0pt]
+\hline
+\textbf{Total} & 407 & 581 & 3018\\[0pt]
+\end{tabular}
+\end{table}
+\end{frame}
+
+
 \section{Related work}
-% talk about certigraph
 \begin{frame}
 \frametitle{Related work}
 \begin{itemize}
 \item Review of various formalization approaches
 \item Motivations, theoretical design choices, and robustness of conclusions
 \end{itemize}
+\end{frame}
+
+\subsection{Mathematical Components}
+\begin{frame}
+\frametitle{Mathematical Components (2004)}
+\begin{itemize}
+\item The infrastructure behind the formal proof of the four-color
+  theorem
+\item Data structures, numbers, lists, finite sets, results in
+  algebra, topology, analysis
+\item Heavy use of proof by reflection, provable correspondence
+  between results of computations and witnesses
+\item Graphs are defined as hypermaps, colorability of reducible
+  configurations is checked for the main proof
+\end{itemize}
+\end{frame}
+
+\subsection{Doczkal and Pous}
+\begin{frame}
+\frametitle{Doczkal and Pous (2020)}
+\begin{itemize}
+\item \textit{Graph Theory in Coq: Minors, Treewidth and Isomorphisms}
+\item Formalization of Menger's theorem, excluded minor
+  characterization of treewidth-two graphs, correspondence between
+  multigraphs of treewidth at most two and certain algebras
+\item Graphs are encoded with a finite type $V$ of vertices and $R :
+  V\to V\to\mathbb{B}$ decidable edge relation, bundled in a record
+  (i.e. named tuple)
+\item The paper discusses formalization of paths, which are heavily
+  used in the theorems of interest
+\end{itemize}
+\end{frame}
+
+\subsection{CertiGraph}
+\begin{frame}[fragile]
+\frametitle{CertiGraph (2019)}
+\begin{itemize}
+\item Project aims to verify correctness of realistic C programs that
+  manipulate heap-represented graphs in memory (Dijkstra, spanning
+  tree, union-find, garbage collection).
+\item Heavy use of separation logic (2002) and spatial reasoning.
+\item Very comprehensive and general development
+\item Generic representation of graphs:
+\end{itemize}
+\begin{minted}[fontsize=\footnotesize]{coq}
+Definition Ensemble (U : Type) := U -> Prop.
+Record PreGraph (Vertex Edge : Type)
+                {EV: EqDec Vertex eq} {EE: EqDec Edge eq} := {
+  vvalid : Ensemble Vertex;
+  evalid : Ensemble Edge;
+  src : Edge -> Vertex;
+  dst : Edge -> Vertex
+}.
+\end{minted}
 \end{frame}
 
 \section{Conclusion}
@@ -521,10 +707,33 @@ Definition nodes (g: graph) := Mdomain g.
 \end{frame}
 
 \begin{frame}
+\frametitle{Other applications of type theory in the mechanization of mathematics}
+\begin{itemize}
+\item CIC is just one point in the design space!
+\item What if equality were more flexible?
+  \begin{itemize}
+  \item Univalent foundations, cubical types $\to$ synthetic homotopy
+    theory (HoTT)
+  \end{itemize}
+\item What does computability give us?
+  \begin{itemize}
+  \item Certified numerical computation, computable reals
+  \end{itemize}
+\item How can it lead to better mathematics?
+  \begin{itemize}
+  \item Formalization of research-level mathematics, perfectoid spaces
+    (Scholze) formalized in Lean, a proof assistant also based in CIC
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
 \frametitle{Acknowledgements}
 \begin{itemize}
-\item Thanks to advisor and mentor, Dr. Steven Tschantz, for invaluable guidance and support
-\item The work leading up to the thesis and the thesis itself would not have been possible without countless extended discussions
+\item Thanks to my advisor and mentor, Dr. Steven Tschantz, for
+  invaluable guidance and support
+\item The work leading up to the thesis and the thesis itself would
+  not have been possible without our countless extended discussions
 \end{itemize}
 \end{frame}
 
@@ -534,8 +743,4 @@ Definition nodes (g: graph) := Mdomain g.
 \Huge{Thank You!}
 \end{frame}
 
-\begin{frame}
-\frametitle{References}
-\printbibliography
-\end{frame}
 \end{document}
