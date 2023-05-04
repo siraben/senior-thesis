@@ -33,8 +33,13 @@ their conclusions.
 
 #+BEGIN_comment
 Notes for presentation later:
-- interesting thing is that this work involves simultaneously ideas
-  from logic, type theory, graph theory and computer science
+- introduce topic, outline, background, etc.
+- this work involves simultaneously ideas
+  from logic, type theory, graph theory and computer science (show
+  venn diagram)
+- slide showing layers on top of each other: calculus of constructions
+-> theory of verified data structures -> theory of graphs -> theory of
+graph coloring
 #+END_comment
 
 \section*{Acknowledgements}
@@ -43,14 +48,6 @@ his invaluable guidance and support over the last two years. The work
 leading up to the thesis and the thesis itself would not have been
 possible without our countless extended discussions.
 
-#+BEGIN_comment
-Writing notes:
-- do not write too much about type theory since we really want to get
-  to writing about *how to define graph theory in type theory*, compare
-  the different formalizations, organizing the theories and proof
-  engineering
-- can always refer reader to other sources (make sure to cite)
-#+END_comment
 \tableofcontents
 \newpage
 * Introduction
@@ -1165,6 +1162,7 @@ Lemma remove_max_deg_adj : forall (g : graph) (i j : node) (d : nat),
     ~ (S.In j (adj g i)).
 #+END_SRC
 
+\newpage
 * Implementing Wigderson's algorithm
 We have described the phases of the algorithm in pseudocode, but we
 now must translate this into Coq. We will do this in a manner
