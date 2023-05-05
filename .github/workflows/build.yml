@@ -1,4 +1,4 @@
-name: Generate PDF
+name: Generate PDF and Presentation
 
 on: push
 
@@ -13,14 +13,21 @@ jobs:
     - name: Install Nix
       uses: cachix/install-nix-action@v20
 
-    - name: Build PDF
+    - name: Build main PDF and Presentation
       run: |
         NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/22.11.tar.gz nix-shell --run "make || true"
         NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/22.11.tar.gz nix-shell --run "make || true"
+        NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/22.11.tar.gz nix-shell --run "make presentation || true"
+        NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/22.11.tar.gz nix-shell --run "make presentation || true"
 
-    - name: Upload artifact
+    - name: Upload main artifact
       if: always()
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: main-pdf
         path: main.pdf
+
+    - name: Upload presentation artifact
+      if: always()
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        path: presentation.pdf
