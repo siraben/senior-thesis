@@ -1098,7 +1098,7 @@ follows the informal one.
 
 We also show the contrapositive of this statement (this is immediate
 since $A\to B$ implies $\neg B\to \neg A$ constructively). This shows
-that if the neighborhood is not colorable, then the graph is not
+that if the neighborhood is not 2-colorable, then the graph is not
 3-colorable. We can use this later to show that if our 2-coloring
 algorithm fails, then the graph is not 3-colorable. This allows us to
 avoid using the 2-coloring given to us by Coq in showing that the
